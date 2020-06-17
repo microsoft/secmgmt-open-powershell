@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "PowerShell": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+      "commandLineArgs": "-NoProfile -NoExit -Command \"Import-Module .\\SecMgmt.psd1\""
+    },
+    "PowerShell Core": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
+      "commandLineArgs": "-NoProfile -NoExit -Command \"Import-Module .\\SecMgmt.psd1\""
+    }
+  }
+}

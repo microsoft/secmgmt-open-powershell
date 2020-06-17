@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5873728E-33A7-447B-A03B-87B2EF296DE0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F76F9F22-84E6-4315-B893-F6CAB040CADB}"
+	ProjectSection(SolutionItems) = preProject
+		azure-pipelines.yml = azure-pipelines.yml
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
+		LICENSE = LICENSE
+		README.md = README.md
+		SECURITY.md = SECURITY.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerShell", "src\PowerShell\PowerShell.csproj", "{A6E8B430-FA70-465F-85C8-A616E0E1328C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A6E8B430-FA70-465F-85C8-A616E0E1328C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6E8B430-FA70-465F-85C8-A616E0E1328C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6E8B430-FA70-465F-85C8-A616E0E1328C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6E8B430-FA70-465F-85C8-A616E0E1328C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A6E8B430-FA70-465F-85C8-A616E0E1328C} = {5873728E-33A7-447B-A03B-87B2EF296DE0}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2991A44F-B70C-45D1-B845-61E74D39639B}
+	EndGlobalSection
+EndGlobal
