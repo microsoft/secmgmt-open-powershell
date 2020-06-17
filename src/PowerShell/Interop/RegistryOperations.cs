@@ -1,30 +1,43 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 namespace Microsoft.Online.SecMgmt.PowerShell.Interop
 {
-    [FlagsAttribute]
-    public enum RegOptions
+    using System;
+    using System.ComponentModel;
+    using System.Runtime.InteropServices;
+    using Microsoft.Win32;
+
+    [Flags]
+    public enum RegOption
     {
-        Nonvolatile = 0x0,
+        NonVolatile = 0x0,
         Volatile = 0x1,
         CreateLink = 0x2,
         BackupRestore = 0x4,
         OpenLink = 0x8
     }
 
-    public enum RegSam
+    [Flags]
+    public enum RegSAM
     {
-        None = 0x0,
-        Write = 0x00020006
+        QueryValue = 0x0001,
+        SetValue = 0x0002,
+        CreateSubKey = 0x0004,
+        EnumerateSubKeys = 0x0008,
+        Notify = 0x0010,
+        CreateLink = 0x0020,
+        WOW64_32Key = 0x0200,
+        WOW64_64Key = 0x0100,
+        WOW64_Res = 0x0300,
+        Read = 0x00020019,
+        Write = 0x00020006,
+        Execute = 0x00020019,
+        AllAccess = 0x000f003f
     }
 
     public enum RegResult
     {
-        None = 0x0,
         CreatedNewKey = 0x00000001,
         OpenedExistingKey = 0x00000002
     }
@@ -33,82 +46,80 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
     {
     }
 
-    public sealed class RegistryOperations
+    /// <summary>
+    /// Provides the ability to perform registry operations.
+    /// </summary>
+    internal sealed class RegistryOperations
     {
-        public const int RegistryDword = 4;
+        [DllImport("advapi32.dll", SetLastError = true)]
+        private static extern int RegCloseKey(IntPtr hKey);
 
-        [DllImport("Advapi32.dll",
-           CharSet = CharSet.Unicode,
-           EntryPoint = "RegCreateKeyEx",
-           SetLastError = true)]
-        static extern int RegCreateKeyEx(
-                      IntPtr hKey,
-                      string lpSubKey,
-                      int Reserved,
-                      string lpClass,
-                      RegOptions dwOptions,
-                      RegSam samDesired,
-                      SecurityAttributes lpSecurityAttributes,
-                      out IntPtr phkResult,
-                      out RegResult lpdwDisposition);
+        [DllImport("Advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyEx", SetLastError = true)]
+        private static extern int RegCreateKeyEx(
+            IntPtr hKey,
+            string lpSubKey,
+            int Reserved,
+            string lpClass,
+            RegOption dwOptions,
+            RegSAM samDesired,
+            SecurityAttributes lpSecurityAttributes,
+            out IntPtr phkResult,
+            out RegResult lpdwDisposition);
 
-        public static void RegistryCreateKey(
-                      IntPtr key,
-                      string subkey,
-                      int reserved,
-                      string classType,
-                      RegOptions options,
-                      RegSam samDesired,
-                      SecurityAttributes securityAttributes,
-                      out IntPtr result,
-                      out RegResult disposition)
-        {
-            int error = 0;
-
-            if ((error = RegCreateKeyEx(key, subkey, reserved, classType, options, samDesired, securityAttributes, out result, out disposition)) != 0)
-            {
-                throw new Win32Exception(error);
-            }
-        }
-
-        [DllImport("Advapi32.dll",
-           CharSet = CharSet.Unicode,
-           EntryPoint = "RegSetValueEx",
-           SetLastError = true)]
-        static extern int RegSetValueEx(
-                      IntPtr hKey,
-                      [In] string lpValueName,
-                      IntPtr lpReserved,
-                      int lpType,
-                      byte[] lpData,
-                      int cbData);
-
-        public static void RegistrySetValue(
-                       IntPtr key,
-                       [In] string valueName,
-                       IntPtr reserved,
-                       int type,
-                       byte[] data,
-                       int countData)
-        {
-            int error = 0;
-            if ((error = RegSetValueEx(key, valueName, reserved, type, data, countData)) != 0)
-            {
-                throw new Win32Exception(error);
-            }
-        }
-
-        [DllImport("Advapi32.dll")]
-        static extern int RegCloseKey(IntPtr hKey);
+        [DllImport("Advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegSetValueEx", SetLastError = true)]
+        private static extern int RegSetValueEx(
+            IntPtr hKey,
+            [In] string lpValueName,
+            IntPtr lpReserved,
+            RegistryValueKind lpType,
+            byte[] lpData,
+            int cbData);
 
         public static void RegistryCloseKey(ref IntPtr key)
         {
-            int error = 0;
+            int error;
+
             if ((error = RegCloseKey(key)) != 0)
             {
                 throw new Win32Exception(error);
             }
-            key = System.IntPtr.Zero;
+
+            key = IntPtr.Zero;
+        }
+
+        public static void RegistryCreateKey(
+            IntPtr hKey,
+            string lpSubKey,
+            int reserved,
+            string lpClass,
+            RegOption dwOptions,
+            RegSAM samDesired,
+            SecurityAttributes lpSecurityAttributes,
+            out IntPtr phkResult,
+            out RegResult lpdwDisposition)
+        {
+            int error;
+
+            if ((error = RegCreateKeyEx(hKey, lpSubKey, reserved, lpClass, dwOptions, samDesired, lpSecurityAttributes, out phkResult, out lpdwDisposition)) != 0)
+            {
+                throw new Win32Exception(error);
+            }
+        }
+
+        public static void RegistrySetValue(
+            IntPtr hKey,
+            [In] string lpValueName,
+            IntPtr reserved,
+            RegistryValueKind dwType,
+            byte[] lpData,
+            int cbData)
+        {
+            int error;
+
+            if ((error = RegSetValueEx(hKey, lpValueName, reserved, dwType, lpData, cbData)) != 0)
+            {
+                throw new Win32Exception(error);
+            }
         }
     }
 }

@@ -12,7 +12,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Network
     using System.Threading;
     using System.Threading.Tasks;
     using System.Web;
-    using Extensions;
     using Identity.Client.Extensibility;
     using Models;
     using Models.Authentication;

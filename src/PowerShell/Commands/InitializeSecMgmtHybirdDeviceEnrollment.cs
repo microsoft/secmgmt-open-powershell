@@ -4,27 +4,32 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 {
     using System;
-    using System.ComponentModel.Design;
     using System.DirectoryServices;
     using System.Management.Automation;
-    using System.Text;
-    using Microsoft.Online.SecMgmt.PowerShell.Interop;
+    using Interop;
+    using Win32;
 
     [Cmdlet(VerbsData.Initialize, "SecMgmtHybirdDeviceEnrollment", SupportsShouldProcess = true)]
     [OutputType(typeof(string))]
     public class InitializeSecMgmtHybirdDeviceEnrollment : PSCmdlet
     {
+        /// <summary>
+        /// Gets or sets the Azure Active Directory domain used for device authentication.
+        /// </summary>
         [Parameter(HelpMessage = "Azure AD domain used for device authentication", Mandatory = true)]
         [ValidateNotNull]
         public string Domain { get; set; }
 
+        /// <summary>
+        /// Gets or sets the display name for the Group Policy that will be created.
+        /// </summary>
         [Parameter(HelpMessage = "Display name for the group policy that will be created", Mandatory = true)]
         [ValidateNotNull]
         public string GroupPolicyDisplayName { get; set; }
 
-        const uint GPO_OPEN_LOAD_REGISTRY = 0x00000001;    // Load the registry files
-        const uint GPO_OPEN_READ_ONLY = 0x00000002;        // Open the GPO as read only
-
+        /// <summary>
+        /// Performs the execution of the command.
+        /// </summary>
         protected override void ProcessRecord()
         {
             using (DirectoryEntry rootDSE = new DirectoryEntry("LDAP://RootDSE"))
@@ -67,63 +72,42 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                     deSCP.CommitChanges();
                 }
 
-                IGroupPolicyObject gpo = new GroupPolicyObject() as IGroupPolicyObject;
-
-                gpo.New("LDAP://DC=ninjacatdevices,DC=com", GroupPolicyDisplayName, 0x1);
-                
-                IntPtr sectionKeyHandle = gpo.GetRegistryKey(0x2);
-                IntPtr key;
+                IGroupPolicyObject groupPolicyObject = new GroupPolicyObject() as IGroupPolicyObject;
                 IntPtr reserved = IntPtr.Zero;
+                IntPtr sectionKeyHandle;
+                string domainName = $"LDAP://{rootDSE.Properties["defaultNamingContext"].Value}";
+
+                groupPolicyObject.New(domainName, GroupPolicyDisplayName, 0x1);
+                sectionKeyHandle = groupPolicyObject.GetRegistryKey(0x2);
 
                 RegistryOperations.RegistryCreateKey(
-                   sectionKeyHandle,
-                   @"Software\Policies\Microsoft\Windows\CurrentVersion\MDM",
-                   0,
-                   null,
-                   0,
-                   RegSam.Write,
-                   null,
-                   out key,
-                   out RegResult desposition);
+                    sectionKeyHandle,
+                    @"Software\Policies\Microsoft\Windows\CurrentVersion\MDM",
+                    0,
+                    null,
+                    0,
+                    RegSAM.Write,
+                    null,
+                    out IntPtr key,
+                    out RegResult desposition);
 
-                byte[] data = { (byte)((int)1),
-                                    (byte)((int)1 >> 8),
-                                    (byte)((int)1 >> 16),
-                                    (byte)((int)1 >> 24) };
+                SetRegistryDWordValue(key, "AutoEnrollMDM", reserved, 1);
+                SetRegistryDWordValue(key, "UseAADCredentialType", reserved, 2);
 
-                RegistryOperations.RegistrySetValue(key,
-                   "AutoEnrollMDM",
-                   reserved,
-                   RegistryOperations.RegistryDword,
-                   data,
-                   4);
-
-                byte[] data2 = {
-                    (byte)((int)2),
-                    (byte)((int)2 >> 8),
-                    (byte)((int)2 >> 16),
-                    (byte)((int)2 >> 24) };
-
-                RegistryOperations.RegistrySetValue(key,
-                    "UseAADCredentialType",
-                    reserved,
-                    RegistryOperations.RegistryDword,
-                    data2,
-                    4);
+                groupPolicyObject.Save(true, true, new Guid("35378EAC-683F-11D2-A89A-00C04FBBCFA2"), new Guid("8FC0B734-A0E1-11d1-A7D3-0000F87571E3"));
 
                 RegistryOperations.RegistryCloseKey(ref key);
-
-                gpo.Save(true, true, new Guid("35378EAC-683F-11D2-A89A-00C04FBBCFA2"), new Guid("8FC0B734-A0E1-11d1-A7D3-0000F87571E3"));
-
                 RegistryOperations.RegistryCloseKey(ref sectionKeyHandle);
-
-                StringBuilder sb = new StringBuilder(1000);
-                gpo.GetPath(sb, 1000);
-
-                string gpoDistinguishedName = sb.ToString();
 
                 WriteObject("Configuration complete!");
             }
+        }
+
+        private void SetRegistryDWordValue(IntPtr key, string valueName, IntPtr reserved, int value)
+        {
+            byte[] data = { (byte)value, (byte)(value >> 8), (byte)(value >> 16), (byte)(value >> 24) };
+
+            RegistryOperations.RegistrySetValue(key, valueName, reserved, RegistryValueKind.DWord, data, 4);
         }
     }
 }

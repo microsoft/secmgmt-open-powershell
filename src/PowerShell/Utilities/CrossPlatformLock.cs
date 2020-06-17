@@ -9,7 +9,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Utilities
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Extensions;
 
     /// <summary>
     /// A cross platform mechanism for creating a lockfile for the token cache.

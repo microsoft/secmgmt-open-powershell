@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.Online.SecMgmt.PowerShell.Utilities
+namespace Microsoft.Online.SecMgmt.PowerShell.Interop
 {
     using System.Runtime.InteropServices;
 

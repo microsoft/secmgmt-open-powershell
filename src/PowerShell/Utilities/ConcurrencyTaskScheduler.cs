@@ -9,7 +9,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Utilities
     using System.Management.Automation;
     using System.Threading;
     using System.Threading.Tasks;
-    using Extensions;
     using Models.Authentication;
     using Properties;
 

@@ -4,7 +4,6 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
 {
     using System.Collections.Generic;
-    using Extensions;
     using Models.Authentication;
 
     /// <summary>

@@ -5,7 +5,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Extensions;
     using Identity.Client;
 
     /// <summary>

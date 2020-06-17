@@ -4,7 +4,6 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
 {
     using System;
-    using Extensions;
 
     /// <summary>
     /// Default builder for chaining authenticators.

@@ -8,7 +8,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Extensions;
     using Identity.Client;
     using Rest;
 

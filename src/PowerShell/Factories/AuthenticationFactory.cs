@@ -8,7 +8,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Factories
     using System.Threading;
     using System.Threading.Tasks;
     using Authenticators;
-    using Extensions;
     using Identity.Client;
     using Models.Authentication;
 

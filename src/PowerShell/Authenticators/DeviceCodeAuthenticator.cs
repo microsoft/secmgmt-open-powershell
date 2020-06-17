@@ -6,7 +6,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
     using System;
     using System.Threading;
     using System.Threading.Tasks;
-    using Extensions;
     using Identity.Client;
     using Models;
     using Models.Authentication;

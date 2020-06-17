@@ -5,7 +5,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Exceptions
 {
     using System;
     using System.Runtime.Serialization;
-    using Extensions;
 
     /// <summary>
     /// The exception that is thrown when an error occurs with the module.

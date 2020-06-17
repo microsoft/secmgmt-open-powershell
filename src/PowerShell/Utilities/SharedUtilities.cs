@@ -5,6 +5,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Utilities
 {
     using System;
     using System.IO;
+    using Interop;
 
     /// <summary>
     /// Provides share utility operations.

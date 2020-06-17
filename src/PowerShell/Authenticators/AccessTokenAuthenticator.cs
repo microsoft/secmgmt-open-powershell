@@ -8,7 +8,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
     using System.Threading;
     using System.Threading.Tasks;
     using Exceptions;
-    using Extensions;
     using Identity.Client;
     using IdentityModel.JsonWebTokens;
     using Models.Authentication;
