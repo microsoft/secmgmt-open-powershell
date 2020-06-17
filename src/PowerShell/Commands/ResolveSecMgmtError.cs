@@ -10,10 +10,10 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using System.Management.Automation;
     using Models.Errors;
 
-    [Cmdlet(VerbsDiagnostic.Resolve, "PartnerError")]
+    [Cmdlet(VerbsDiagnostic.Resolve, "SecMgmtError")]
     [OutputType(typeof(MgmtErrorRecord))]
     [OutputType(typeof(MgmtExceptionRecord))]
-    public class ResolvePartnerError : PSCmdlet
+    public class ResolveSecMgmtError : PSCmdlet
     {
         private const string AnyErrorParameterSet = "AnyErrorParameterSet";
 

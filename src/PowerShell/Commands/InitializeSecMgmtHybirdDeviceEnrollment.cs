@@ -4,24 +4,64 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 {
     using System.Management.Automation;
+    using System.Collections.ObjectModel;
+    using System.DirectoryServices;
 
     [Cmdlet(VerbsData.Initialize, "SecMgmtHybirdDeviceEnrollment", SupportsShouldProcess = true)]
     [OutputType(typeof(string))]
     public class InitializeSecMgmtHybirdDeviceEnrollment : PSCmdlet
     {
+        [Parameter(HelpMessage = "Azure AD domain used for device authentication", Mandatory = true)]
+        [ValidateNotNull]
+        public string Domain { get; set; }
+        
         protected override void ProcessRecord()
         {
-            // Step 1 - Verify that the system is running Windows and has Azure AD Connect installed
-            // Step 2 - Make sure that MS Online is installed, if it is not then install it
-            // Step 3 - Run the following command Initialize-ADSyncDomainJoinedComputerSync -AdConnectorAccount $aadConnectorAccount -AzureADCredentials $credential 
-            // Step 4 - Create a Group Policy using the following script as a guide
+            using (DirectoryEntry rootDSE = new DirectoryEntry("LDAP://RootDSE"))
+            {
+                DirectoryEntry deDRC;
+                DirectoryEntry deSCP;
+                string azureADId = "azureADId:851f90cd-614e-4523-acc1-cef7aaf00638";
+                string azureADName = $"azureADName:{Domain}";
+                string configCN = rootDSE.Properties["configurationNamingContext"][0].ToString();
+                string servicesCN = $"CN=Services,{configCN}";
+                string drcCN = $"CN=Device Registration Configuration,{servicesCN}";
+                string scpCN = $"CN=62a0ff2e-97b9-4513-943f-0d221bd30080,{drcCN}";
 
-            //$gpo = New - GPO - Name 'Device enrollment'
-            //$gpo | New - GPLink - target "DC=contoso,DC=com" - LinkEnabled Yes
-            //$gpo | Set - GPRegistryValue - key "HKLM\Software\Policies\Microsoft\Windows\CurrentVersion\MDM" - ValueName AutoEnrollMDM - Type DWORD - value 1
-            //$gpo | Set - GPRegistryValue - key "HKLM\Software\Policies\Microsoft\Windows\CurrentVersion\MDM" - ValueName UseAADCredentialType - Type DWORD - value 2
+                if (DirectoryEntry.Exists($"LDAP://{drcCN}"))
+                {
+                    deDRC = new DirectoryEntry($"LDAP://{drcCN}");
+                }
+                else 
+                {
+                    DirectoryEntry entry = new DirectoryEntry($"LDAP://{servicesCN}");
+                    deDRC = entry.Children.Add("CN=Device Registration Configuration", "container");
+                    deDRC.CommitChanges();
+                }
 
-            base.ProcessRecord();
+                if (DirectoryEntry.Exists($"LDAP://{scpCN}"))
+                {
+                    deSCP = new DirectoryEntry($"LDAP://{scpCN}");
+
+                    foreach (var value in deSCP.Properties["keywords"])
+                    {
+                        deSCP.Properties["keywords"].Remove(value);
+                    }
+
+                    deSCP.Properties["keywords"].Add(azureADName);
+                    deSCP.Properties["keywords"].Add(azureADId);
+                    deSCP.CommitChanges();
+                }
+                else
+                {
+                    deSCP = deDRC.Children.Add("CN=62a0ff2e-97b9-4513-943f-0d221bd30080", "serviceConnectionPoint");
+                    deSCP.Properties["keywords"].Add(azureADName);
+                    deSCP.Properties["keywords"].Add(azureADId);
+                    deSCP.CommitChanges();
+                }
+
+                WriteObject("Configuration complete!");
+            }
         }
     }
 }

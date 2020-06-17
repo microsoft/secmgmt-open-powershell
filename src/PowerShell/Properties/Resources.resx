@@ -141,7 +141,7 @@
  - {1}</value>
   </data>
   <data name="BreakingChangesAttributesFooterMessage" xml:space="preserve">
-    <value>NOTE : Go to {0} for steps to suppress this breaking change warning, and other information on breaking changes with the Partner Center PowerShell module.</value>
+    <value>NOTE : Go to {0} for steps to suppress this breaking change warning, and other information on breaking changes with the Security and Management Open PowerShell module.</value>
   </data>
   <data name="BreakingChangesAttributesHeaderMessage" xml:space="preserve">
     <value>Breaking changes in the cmdlet '{0}' :</value>

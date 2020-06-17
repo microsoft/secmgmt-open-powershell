@@ -4,7 +4,7 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Exceptions
 {
     /// <summary>
-    /// The possible error categories for Partner Center PowerShell.
+    /// The possible error categories for the module.
     /// </summary>
     public enum MgmtPowerShellErrorCategory
     {

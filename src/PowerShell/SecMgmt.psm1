@@ -15,7 +15,7 @@ function Test-DotNet
     {
         if ((Get-PSDrive 'HKLM' -ErrorAction Ignore) -and (-not (Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\' -ErrorAction Stop | Get-ItemPropertyValue -ErrorAction Stop -Name Release | Where { $_ -ge 461808 })))
         {
-            throw ".NET Framework versions lower than 4.7.2 are not supported by the Partner Center module. Please upgrade to .NET Framework 4.7.2 or higher."
+            throw ".NET Framework versions lower than 4.7.2 are not supported by the Security and Management Open PowerShell module. Please upgrade to .NET Framework 4.7.2 or higher."
         }
     }
     catch [System.Management.Automation.DriveNotFoundException]
@@ -28,7 +28,7 @@ if ($true -and ($PSEdition -eq 'Desktop'))
 {
     if ($PSVersionTable.PSVersion -lt [Version]'5.1')
     {
-        throw "PowerShell versions lower than 5.1 are not supported by the Partner Center module. Please upgrade to PowerShell 5.1 or higher."
+        throw "PowerShell versions lower than 5.1 are not supported by the Security and Management Open PowerShell module. Please upgrade to PowerShell 5.1 or higher."
     }
 
     Test-DotNet

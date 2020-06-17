@@ -140,7 +140,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
                 MgmtSession.Instance.DebugMessages.Enqueue($"[MSAL] {level} {message}");
             }).Build();
 
-            if (MgmtSession.Instance.TryGetComponent(ComponentKey.TokenCache, out IPartnerTokenCache tokenCache))
+            if (MgmtSession.Instance.TryGetComponent(ComponentKey.TokenCache, out IMgmtTokenCache tokenCache))
             {
                 tokenCache.RegisterCache(client);
             }
@@ -182,7 +182,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
             }).Build();
 
 
-            if (MgmtSession.Instance.TryGetComponent(ComponentKey.TokenCache, out IPartnerTokenCache tokenCache))
+            if (MgmtSession.Instance.TryGetComponent(ComponentKey.TokenCache, out IMgmtTokenCache tokenCache))
             {
                 tokenCache.RegisterCache(client);
             }

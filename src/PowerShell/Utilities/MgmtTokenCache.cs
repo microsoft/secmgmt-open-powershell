@@ -8,7 +8,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Utilities
     /// <summary>
     /// Implements the core functionality for a token cache.
     /// </summary>
-    public abstract class MgmtTokenCache : IPartnerTokenCache
+    public abstract class MgmtTokenCache : IMgmtTokenCache
     {
         /// <summary>
         /// Gets or sets the client identifier used to request a token.

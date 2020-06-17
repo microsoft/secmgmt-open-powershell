@@ -8,7 +8,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Exceptions
     using Extensions;
 
     /// <summary>
-    /// The exception that is thrown when an error occurs with Partner Center PowerShell.
+    /// The exception that is thrown when an error occurs with the module.
     /// </summary>
     public class MgmtPowerShellException : Exception
     {

@@ -4,7 +4,6 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
 {
     using System.Collections.Generic;
-    using Extensions;
     using Models.Authentication;
 
     /// <summary>
@@ -27,12 +26,12 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
         }
 
         /// <summary>
-        /// Gets the partner account information.
+        /// Gets the account information.
         /// </summary>
         public MgmtAccount Account { get; }
 
         /// <summary>
-        /// Gets the partner environment information.
+        /// Gets the Microsoft cloud environment information.
         /// </summary>
         public MgmtEnvironment Environment { get; }
 

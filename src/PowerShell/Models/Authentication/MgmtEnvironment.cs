@@ -33,17 +33,12 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Models.Authentication
         public string GraphEndpoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the partner environment name.
+        /// Gets or sets the environment name.
         /// </summary>
         public EnvironmentName EnvironmentName { get; set; }
 
         /// <summary>
-        /// Gets the Partner Center endpoint.
-        /// </summary>
-        public string PartnerCenterEndpoint { get; set; }
-
-        /// <summary>
-        /// Gets the defined Microsoft Partner Center environments.
+        /// Gets the defined Microsoft cloud environments.
         /// </summary>
         public static IDictionary<EnvironmentName, MgmtEnvironment> PublicEnvironments { get; } = InitializeEnvironments();
 

@@ -207,11 +207,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                     account.SetProperty("UseDeviceAuth", "true");
                 }
 
-                account.SetProperty(
-                    MgmtAccountPropertyType.Scope,
-                    ParameterSetName.Equals(ServicePrincipalParameterSet, StringComparison.InvariantCultureIgnoreCase) ?
-                        $"{environment.AzureAdGraphEndpoint}/.default" :
-                        $"{environment.PartnerCenterEndpoint}/user_impersonation");
+                account.SetProperty(MgmtAccountPropertyType.Scope, $"{environment.GraphEndpoint}/.default");
 
                 account.Tenant = string.IsNullOrEmpty(Tenant) ? "organizations" : Tenant;
 

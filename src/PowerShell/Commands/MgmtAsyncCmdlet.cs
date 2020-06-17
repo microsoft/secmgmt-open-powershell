@@ -12,7 +12,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using Utilities;
 
     /// <summary>
-    /// The base class for asynchronous partner cmdlets.
+    /// The base class for asynchronous cmdlets.
     /// </summary>
     public abstract class MgmtAsyncCmdlet : MgmtPSCmdlet
     {

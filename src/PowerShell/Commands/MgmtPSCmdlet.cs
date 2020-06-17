@@ -16,14 +16,14 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using Rest;
 
     /// <summary>
-    /// The base class for PowerShell cmdlets.
+    /// The base class for cmdlets.
     /// </summary>
     public abstract class MgmtPSCmdlet : PSCmdlet, IDisposable
     {
         /// <summary>
         /// The link that provide addtional information regarding the breaking change.
         /// </summary>
-        private const string BREAKING_CHANGE_ATTRIBUTE_INFORMATION_LINK = "https://aka.ms/partnercenterps-changewarnings";
+        private const string BREAKING_CHANGE_ATTRIBUTE_INFORMATION_LINK = "https://aka.ms/secmgmtps-changewarnings";
 
         /// <summary>
         /// Provides a signal to <see cref="System.Threading.CancellationToken" /> that it should be canceled.

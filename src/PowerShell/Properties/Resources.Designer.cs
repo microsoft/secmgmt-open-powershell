@@ -126,7 +126,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to NOTE : Go to {0} for steps to suppress this breaking change warning, and other information on breaking changes with the Partner Center PowerShell module..
+        ///   Looks up a localized string similar to NOTE : Go to {0} for steps to suppress this breaking change warning, and other information on breaking changes with the Security and Management Open PowerShell module..
         /// </summary>
         internal static string BreakingChangesAttributesFooterMessage {
             get {
