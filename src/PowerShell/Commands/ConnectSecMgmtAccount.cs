@@ -4,19 +4,16 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 {
     using System;
-    using System.IO;
     using System.Management.Automation;
     using System.Text.RegularExpressions;
-    using Factories;
     using Models.Authentication;
-    using Utilities;
 
     /// <summary>
     /// Cmdlet to login to a Microsoft cloud.
     /// </summary>
     [Cmdlet(VerbsCommunications.Connect, "SecMgmtAccount", DefaultParameterSetName = UserParameterSet, SupportsShouldProcess = true)]
     [OutputType(typeof(MgmtContext))]
-    public class ConnectSecMgmtAccount : MgmtAsyncCmdlet, IModuleAssemblyInitializer
+    public class ConnectSecMgmtAccount : MgmtAsyncCmdlet
     {
         /// <summary>
         /// The name of the access token parameter set.
@@ -122,31 +119,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         [Alias("Device", "DeviceAuth", "DeviceCode")]
         [Parameter(HelpMessage = "Use device code authentication instead of a browser control.", Mandatory = false, ParameterSetName = UserParameterSet)]
         public SwitchParameter UseDeviceAuthentication { get; set; }
-
-        /// <summary>
-        /// Performs the required operations when the module is imported.
-        /// </summary>
-        public void OnImport()
-        {
-            if (MgmtSession.Instance.AuthenticationFactory == null)
-            {
-                MgmtSession.Instance.AuthenticationFactory = new AuthenticationFactory();
-            }
-
-            if (MgmtSession.Instance.ClientFactory == null)
-            {
-                MgmtSession.Instance.ClientFactory = new ClientFactory();
-            }
-
-            if (File.Exists(Path.Combine(SharedUtilities.GetUserRootDirectory(), ".SecMgmt", "InMemoryTokenCache")))
-            {
-                MgmtSession.Instance.RegisterComponent(ComponentKey.TokenCache, () => new InMemoryTokenCache());
-            }
-            else
-            {
-                MgmtSession.Instance.RegisterComponent(ComponentKey.TokenCache, () => new PersistentTokenCache());
-            }
-        }
 
         /// <summary>
         /// Executes the operations associated with the cmdlet.
