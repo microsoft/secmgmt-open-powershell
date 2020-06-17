@@ -1,7 +1,5 @@
 strategy:
   matrix:
-    Linux:
-      imageName: 'ubuntu-latest'
     macOS:
       imageName: 'macOS-latest'
     Windows:
