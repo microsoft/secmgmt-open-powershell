@@ -9,7 +9,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
     using System.Threading.Tasks;
     using Identity.Client;
     using Models.Authentication;
-    using Utilities;
 
     /// <summary>
     /// Provides a chain of responsibility pattern for authenticators.
@@ -139,11 +138,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
                 MgmtSession.Instance.DebugMessages.Enqueue($"[MSAL] {level} {message}");
             }).Build();
 
-            if (MgmtSession.Instance.TryGetComponent(ComponentKey.TokenCache, out IMgmtTokenCache tokenCache))
-            {
-                tokenCache.RegisterCache(client);
-            }
-
             return client;
         }
 
@@ -180,11 +174,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
                 MgmtSession.Instance.DebugMessages.Enqueue($"[MSAL] {level} {message}");
             }).Build();
 
-
-            if (MgmtSession.Instance.TryGetComponent(ComponentKey.TokenCache, out IMgmtTokenCache tokenCache))
-            {
-                tokenCache.RegisterCache(client);
-            }
 
             return client;
         }

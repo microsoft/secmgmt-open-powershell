@@ -3,11 +3,9 @@
 
 namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 {
-    using System.IO;
     using System.Management.Automation;
     using Factories;
     using Models.Authentication;
-    using Utilities;
 
     /// <summary>
     /// Used to perform actions when the module is intitialized.
@@ -27,15 +25,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             if (MgmtSession.Instance.ClientFactory == null)
             {
                 MgmtSession.Instance.ClientFactory = new ClientFactory();
-            }
-
-            if (File.Exists(Path.Combine(SharedUtilities.GetUserRootDirectory(), ".SecMgmt", "InMemoryTokenCache")))
-            {
-                MgmtSession.Instance.RegisterComponent(ComponentKey.TokenCache, () => new InMemoryTokenCache());
-            }
-            else
-            {
-                MgmtSession.Instance.RegisterComponent(ComponentKey.TokenCache, () => new PersistentTokenCache());
             }
         }
     }
