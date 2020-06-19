@@ -68,7 +68,6 @@
 
   <Target Name="CopyFiles" AfterTargets="Build">
     <Copy SourceFiles="@(PreLoadAssemblies)" DestinationFolder="$(TargetDir)\PreloadAssemblies" />
-    <Copy SourceFiles="$(RepoSrc)lib\PreloadAssemblyInfo.json" DestinationFolder="$(TargetDir)" />
   </Target>
 
 </Project>
