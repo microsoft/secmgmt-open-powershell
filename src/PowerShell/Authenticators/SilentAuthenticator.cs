@@ -9,6 +9,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
     using System.Threading;
     using System.Threading.Tasks;
     using Identity.Client;
+    using Microsoft.Graph;
     using Rest;
 
     /// <summary>
@@ -27,6 +28,9 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
         public override async Task<AuthenticationResult> AuthenticateAsync(AuthenticationParameters parameters, CancellationToken cancellationToken = default)
         {
             IClientApplicationBase app = GetClient(parameters.Account, parameters.Environment);
+
+            var data = await app.GetAccountsAsync().ConfigureAwait(false);
+            ServiceClientTracing.Information($"[SilentAuthenticator] data count is {data.Count()}");
 
             ServiceClientTracing.Information("[SilentAuthenticator] Calling GetAccountsAsync");
             IEnumerable<IAccount> accounts = await app.AsPublicClient().GetAccountsAsync().ConfigureAwait(false);

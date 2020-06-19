@@ -9,6 +9,9 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using Interop;
     using Win32;
 
+    /// <summary>
+    /// Cmdlet that creates the group policy and service connection point required to have domain joined devices automatically enroll into MDM.
+    /// </summary>
     [Cmdlet(VerbsData.Initialize, "SecMgmtHybirdDeviceEnrollment", SupportsShouldProcess = true)]
     [OutputType(typeof(string))]
     public class InitializeSecMgmtHybirdDeviceEnrollment : PSCmdlet
@@ -16,7 +19,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         /// <summary>
         /// Gets or sets the Azure Active Directory domain used for device authentication.
         /// </summary>
-        [Parameter(HelpMessage = "Azure AD domain used for device authentication", Mandatory = true)]
+        [Parameter(HelpMessage = "Azure Active Directory domain used for device authentication", Mandatory = true)]
         [ValidateNotNull]
         public string Domain { get; set; }
 
@@ -32,6 +35,11 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         /// </summary>
         protected override void ProcessRecord()
         {
+            if (!ShouldProcess("Creates the group policy and  service connection point required to have domain joined devices automatically enroll into MDM."))
+            {
+                return;
+            }
+
             using (DirectoryEntry rootDSE = new DirectoryEntry("LDAP://RootDSE"))
             {
                 DirectoryEntry deDRC;
@@ -45,10 +53,12 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 
                 if (DirectoryEntry.Exists($"LDAP://{drcCN}"))
                 {
+                    WriteDebug($"Device registration configuration container already exists at LDAP://{drcCN}");
                     deDRC = new DirectoryEntry($"LDAP://{drcCN}");
                 }
                 else
                 {
+                    WriteDebug($"Creating the device registration configuration container in LDAP://{servicesCN}");
                     DirectoryEntry entry = new DirectoryEntry($"LDAP://{servicesCN}");
                     deDRC = entry.Children.Add("CN=Device Registration Configuration", "container");
                     deDRC.CommitChanges();
@@ -58,14 +68,17 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 {
                     deSCP = new DirectoryEntry($"LDAP://{scpCN}");
 
+                    WriteDebug($"Service connection point LDAP://{scpCN} already exists, so clearing the keywords property");
                     deSCP.Properties["keywords"].Clear();
 
+                    WriteDebug($"Updating the keywords propoerty on the service connection point LDAP://{scpCN}");
                     deSCP.Properties["keywords"].Add(azureADName);
                     deSCP.Properties["keywords"].Add(azureADId);
                     deSCP.CommitChanges();
                 }
                 else
                 {
+                    WriteDebug($"The service connection point LDAP://{scpCN} does not exists, so it will be created");
                     deSCP = deDRC.Children.Add("CN=62a0ff2e-97b9-4513-943f-0d221bd30080", "serviceConnectionPoint");
                     deSCP.Properties["keywords"].Add(azureADName);
                     deSCP.Properties["keywords"].Add(azureADId);
@@ -77,6 +90,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 IntPtr sectionKeyHandle;
                 string domainName = $"LDAP://{rootDSE.Properties["defaultNamingContext"].Value}";
 
+                WriteDebug($"Creating {GroupPolicyDisplayName} group policy");
                 groupPolicyObject.New(domainName, GroupPolicyDisplayName, 0x1);
                 sectionKeyHandle = groupPolicyObject.GetRegistryKey(0x2);
 
@@ -99,7 +113,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 RegistryOperations.RegistryCloseKey(ref key);
                 RegistryOperations.RegistryCloseKey(ref sectionKeyHandle);
 
-                WriteObject("Configuration complete!");
+                WriteObject($"Domain has been prepared and the {GroupPolicyDisplayName} group policy has been created. You will need to link the group policy for the settings to apply.");
             }
         }
 

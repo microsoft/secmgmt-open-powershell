@@ -26,7 +26,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         private const string Message = "We have launched a browser for you to login. For the old experience with device code flow, please run 'Connect-SecMgmtAccount -UseDeviceAuthentication'.";
 
         /// <summary>
-        /// The default application identifier value used when generating an access tokne.
+        /// The default application identifier value used when generating an access token.
         /// </summary>
         private const string PowerShellApplicationId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
 

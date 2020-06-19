@@ -76,7 +76,7 @@
     # TypesToProcess = @()
 
     # Format files (.ps1xml) to be loaded when importing this module
-    # FormatsToProcess = 'Microsoft.Online.SecMgmt.PowerShell.format.ps1xml'
+    FormatsToProcess = 'Microsoft.Online.SecMgmt.PowerShell.format.ps1xml'
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     NestedModules = @()
@@ -88,6 +88,7 @@
     CmdletsToExport = 'Connect-SecMgmtAccount',
                       'Disconnect-SecMgmtAccount',
                       'Initialize-SecMgmtHybirdDeviceEnrollment',
+                      'Install-SecMgmtInsightsConnector',
                       'Resolve-SecMgmtError'
 
     # Variables to export from this module

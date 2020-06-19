@@ -37,6 +37,7 @@
 
   <ItemGroup>
     <PreLoadAssemblies Include="$(RepoSrc)lib\NetFxPreloadAssemblies\*.dll" />
+    <PreLoadAssemblies Include="$(RepoSrc)lib\System.Security.Cryptography.ProtectedData.dll" />
   </ItemGroup>
 
   <ItemGroup>
