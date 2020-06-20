@@ -21,7 +21,7 @@ Disconnects the current session from the Microsoft cloud.
 Performs the tasks to intialize Hybrid Azure AD join in the current forest to be managed by MDM.
 
 ### [Install-SecMgmtInsightsConnector](Install-SecMgmtInsightsConnector.md)
-Installs the latest version of the Security and Management Insights Power BI connector.
+Installs the latest version of the Security and Management Insights Power BI connector 
 
 ### [Resolve-SecMgmtError](Resolve-SecMgmtError.md)
 Display detailed information about PowerShell errors, with extended details for cmdlet errors.

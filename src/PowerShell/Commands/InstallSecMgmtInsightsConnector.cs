@@ -42,18 +42,33 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         public string ApplicationId { get; set; }
 
         /// <summary>
+        /// Gets or sets a flag indicating whether or not pre-consent should be configured.
+        /// </summary>
+        [Parameter(HelpMessage = "Flag indicating whether or not the Azure Active Directory application should be configured for pre-consent.")]
+        public SwitchParameter ConfigurePreconsent { get; set; }
+
+        /// <summary>
         /// Executes the operations associated with the cmdlet.
         /// </summary>
         public override void ExecuteCmdlet()
         {
             Scheduler.RunTask(async () =>
             {
+                GraphServiceClient client = MgmtSession.Instance.ClientFactory.CreateGraphServiceClient() as GraphServiceClient;
+                client.AuthenticationProvider = new GraphAuthenticationProvider();
+
                 string appId = string.IsNullOrEmpty(ApplicationDisplayName) ?
-                    ApplicationId : await CreateApplicationAsync().ConfigureAwait(false);
+                    ApplicationId : await CreateApplicationAsync(client).ConfigureAwait(false);
                 string docsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 string connectorPath = Path.Combine(docsPath, "Microsoft Power BI Desktop", "Custom Connectors");
                 string workingPath = Path.Combine(connectorPath, Path.GetRandomFileName());
                 string zipPath = Path.Combine(connectorPath, "secmgmt-insights-connector.zip");
+
+                if (ConfigurePreconsent.IsPresent && ConfigurePreconsent.IsPresent)
+                {
+                    WriteDebug($"Configuring the application {appId} for pre-consent");
+                    await ConfigurePreconsentAsync(client, appId);
+                }
 
                 WriteDebug($"Esuring that {connectorPath} exists");
                 System.IO.Directory.CreateDirectory(connectorPath);
@@ -81,11 +96,15 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             }, true);
         }
 
-        private async Task<string> CreateApplicationAsync()
+        private async Task ConfigurePreconsentAsync(IGraphServiceClient client, string appId)
         {
-            GraphServiceClient client = MgmtSession.Instance.ClientFactory.CreateGraphServiceClient() as GraphServiceClient;
-            client.AuthenticationProvider = new GraphAuthenticationProvider();
+            ServicePrincipal servicePrincipal = await GetServicePrincipalAsync(client, appId).ConfigureAwait(false); ;
+            IGraphServiceGroupsCollectionPage groups = await client.Groups.Request().Filter("DisplayName eq AdminAgents").GetAsync().ConfigureAwait(false);
+            await client.Groups[groups[0].Id].Members.References.Request().AddAsync(servicePrincipal).ConfigureAwait(false);
+        }
 
+        private async Task<string> CreateApplicationAsync(IGraphServiceClient client)
+        {
             WriteDebug("Creating an Azure Active Directory application");
 
             Application app = await client.Applications.Request().AddAsync(new Application
@@ -106,21 +125,25 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 AppId = app.AppId
             }).ConfigureAwait(false);
 
+            ServicePrincipal resourcePrincipal = await GetServicePrincipalAsync(client, "c5393580-f805-4401-95e8-94b7a6ef2fc2").ConfigureAwait(false);
+
             await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
             {
                 ClientId = servicePrincipal.Id,
                 ConsentType = "AllPrincipals",
-                ResourceId = await GetServicePrincipalId(client, "c5393580-f805-4401-95e8-94b7a6ef2fc2").ConfigureAwait(false),
+                ResourceId = resourcePrincipal.Id,
                 Scope = "ActivityFeed.Read ActivityFeed.ReadDlp ServiceHealth.Read"
             });
 
             WriteDebug($"Creating the Microsoft Graph OAuth2 permission grant for the {app.AppId} application");
 
+            resourcePrincipal = await GetServicePrincipalAsync(client, "00000003-0000-0000-c000-000000000000").ConfigureAwait(false);
+
             await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
             {
                 ClientId = servicePrincipal.Id,
                 ConsentType = "AllPrincipals",
-                ResourceId = await GetServicePrincipalId(client, "00000003-0000-0000-c000-000000000000").ConfigureAwait(false),
+                ResourceId = resourcePrincipal.Id,
                 Scope = "AuditLog.Read.All DeviceManagementApps.Read.All DeviceManagementConfiguration.Read.All DeviceManagementManagedDevices.Read.All DeviceManagementServiceConfig.Read.All Directory.Read.All IdentityRiskyUser.Read.All InformationProtectionPolicy.Read Policy.Read.All Reports.Read.All SecurityEvents.Read.All User.Read"
             });
 
@@ -163,11 +186,11 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             };
         }
 
-        private async Task<string> GetServicePrincipalId(IGraphServiceClient client, string resourceAppId)
+        private async Task<ServicePrincipal> GetServicePrincipalAsync(IGraphServiceClient client, string resourceAppId)
         {
             IGraphServiceServicePrincipalsCollectionPage servicePrincipal = await client.ServicePrincipals.Request().Filter($"AppId eq '{resourceAppId}'").GetAsync().ConfigureAwait(false);
 
-            return servicePrincipal[0].Id;
+            return servicePrincipal[0];
         }
     }
 }
