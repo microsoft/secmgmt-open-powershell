@@ -11,7 +11,7 @@
     RootModule = 'SecMgmt.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.0.0'
+    ModuleVersion = '0.0.1'
 
     # Supported PSEditions
     CompatiblePSEditions = 'Core', 'Desktop'
@@ -125,7 +125,7 @@
             ReleaseNotes = ''
 
             # Prerelease string of this module
-            Prerelease = 'preview'
+            # Prerelease = 'preview'
 
             # Flag to indicate whether the module requires explicit user acceptance for install/update
             # RequireLicenseAcceptance = $false

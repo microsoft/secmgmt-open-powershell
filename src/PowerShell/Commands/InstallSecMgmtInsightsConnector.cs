@@ -5,23 +5,41 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
+    using System.IO.Compression;
     using System.Management.Automation;
+    using System.Net;
     using System.Threading.Tasks;
     using Graph;
     using Models.Authentication;
     using Network;
 
-    [Cmdlet(VerbsLifecycle.Install, "SecMgmtInsightsConnector", SupportsShouldProcess = true)]
+    [Cmdlet(VerbsLifecycle.Install, "SecMgmtInsightsConnector", DefaultParameterSetName = CreateAppParameterSetName, SupportsShouldProcess = true)]
     [OutputType(typeof(string))]
     public class InstallSecMgmtInsightsConnector : MgmtAsyncCmdlet
     {
         /// <summary>
+        /// Name of the create app parameter set.
+        /// </summary>
+        private const string CreateAppParameterSetName = "CreateApp";
+
+        /// <summary>
+        /// Name of the use existing parameter set.
+        /// </summary>
+        private const string UseExistingParameterSetName = "UseExisting";
+
+        /// <summary>
         /// Gets or sets the display name for the Azure Active Directory application that will be created.
         /// </summary>
         [Alias("AppDisplayName")]
-        [Parameter(HelpMessage = "Display name for the Azure Active Directory application that will be created.", Mandatory = true)]
+        [Parameter(HelpMessage = "Display name for the Azure Active Directory application that will be created.", Mandatory = true, ParameterSetName = CreateAppParameterSetName)]
         [ValidateNotNullOrEmpty]
         public string ApplicationDisplayName { get; set; }
+
+        [Alias("AppId")]
+        [Parameter(HelpMessage = "Identifier for the Azure Active Directory application configured for the SecMgmtInsights connector.", Mandatory = true, ParameterSetName = UseExistingParameterSetName)]
+        [ValidateNotNullOrEmpty]
+        public string ApplicationId { get; set; }
 
         /// <summary>
         /// Executes the operations associated with the cmdlet.
@@ -30,48 +48,83 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         {
             Scheduler.RunTask(async () =>
             {
-                GraphServiceClient client = MgmtSession.Instance.ClientFactory.CreateGraphServiceClient() as GraphServiceClient;
-                client.AuthenticationProvider = new GraphAuthenticationProvider();
+                string appId = string.IsNullOrEmpty(ApplicationDisplayName) ?
+                    ApplicationId : await CreateApplicationAsync().ConfigureAwait(false);
+                string docsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                string connectorPath = Path.Combine(docsPath, "Microsoft Power BI Desktop", "Custom Connectors");
+                string workingPath = Path.Combine(connectorPath, Path.GetRandomFileName());
+                string zipPath = Path.Combine(connectorPath, "secmgmt-insights-connector.zip");
 
-                WriteDebug("Creating an Azure Active Directory application");
+                WriteDebug($"Esuring that {connectorPath} exists");
+                System.IO.Directory.CreateDirectory(connectorPath);
 
-                Application app = await client.Applications.Request().AddAsync(new Application
+                WriteDebug($"Downloading the latest secmgmt-insights-connect release from https://aka.ms/secmgmt-insights-connector/latest");
+
+                using (WebClient webClient = new WebClient())
                 {
-                    DisplayName = ApplicationDisplayName,
-                    PublicClient = new PublicClientApplication
-                    {
-                        RedirectUris = new[] { "https://oauth.powerbi.com/views/oauthredirect.html" }
-                    },
-                    RequiredResourceAccess = GetRequiredResourceAccess(),
-                    SignInAudience = "AzureADMultipleOrgs"
-                }, CancellationToken).ConfigureAwait(false);
+                    webClient.DownloadFile("https://aka.ms/secmgmt-insights-connector/latest", zipPath);
+                }
 
-                WriteDebug($"Creating a service principal for the {app.AppId} application");
+                WriteDebug($"Extracting {zipPath} to {workingPath}");
+                ZipFile.ExtractToDirectory(zipPath, workingPath);
 
-                ServicePrincipal servicePrincipal = await client.ServicePrincipals.Request().AddAsync(new ServicePrincipal
-                {
-                    AppId = app.AppId
-                }).ConfigureAwait(false);
+                WriteDebug($"Writing the appliction identifer to {Path.Combine(workingPath, "client_id")}");
+                System.IO.File.WriteAllText(Path.Combine(workingPath, "client_id"), appId);
 
-                await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
-                {
-                    ClientId = servicePrincipal.Id,
-                    ConsentType = "AllPrincipals",
-                    ResourceId = await GetServicePrincipalId(client, "c5393580-f805-4401-95e8-94b7a6ef2fc2").ConfigureAwait(false),
-                    Scope = "ActivityFeed.Read ActivityFeed.ReadDlp ServiceHealth.Read"
-                });
+                ZipFile.CreateFromDirectory(workingPath, Path.Combine(connectorPath, "SecMgmtInsights.mez"));
 
-                WriteDebug($"Creating the Microsoft Graph OAuth2 permission grant for the {app.AppId} application");
+                WriteDebug($"Deleting {zipPath}");
+                System.IO.File.Delete(zipPath);
 
-                await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
-                {
-                    ClientId = servicePrincipal.Id,
-                    ConsentType = "AllPrincipals",
-                    ResourceId = await GetServicePrincipalId(client, "00000003-0000-0000-c000-000000000000").ConfigureAwait(false),
-                    Scope = "AuditLog.Read.All DeviceManagementApps.Read.All DeviceManagementConfiguration.Read.All DeviceManagementManagedDevices.Read.All DeviceManagementServiceConfig.Read.All Directory.Read.All IdentityRiskyUser.Read.All InformationProtectionPolicy.Read Policy.Read.All Reports.Read.All SecurityEvents.Read.All User.Read"
-                });
-
+                WriteDebug($"Deleting {workingPath}");
+                System.IO.Directory.Delete(workingPath, true);
             }, true);
+        }
+
+        private async Task<string> CreateApplicationAsync()
+        {
+            GraphServiceClient client = MgmtSession.Instance.ClientFactory.CreateGraphServiceClient() as GraphServiceClient;
+            client.AuthenticationProvider = new GraphAuthenticationProvider();
+
+            WriteDebug("Creating an Azure Active Directory application");
+
+            Application app = await client.Applications.Request().AddAsync(new Application
+            {
+                DisplayName = ApplicationDisplayName,
+                PublicClient = new PublicClientApplication
+                {
+                    RedirectUris = new[] { "https://oauth.powerbi.com/views/oauthredirect.html" }
+                },
+                RequiredResourceAccess = GetRequiredResourceAccess(),
+                SignInAudience = "AzureADMultipleOrgs"
+            }, CancellationToken).ConfigureAwait(false);
+
+            WriteDebug($"Creating a service principal for the {app.AppId} application");
+
+            ServicePrincipal servicePrincipal = await client.ServicePrincipals.Request().AddAsync(new ServicePrincipal
+            {
+                AppId = app.AppId
+            }).ConfigureAwait(false);
+
+            await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
+            {
+                ClientId = servicePrincipal.Id,
+                ConsentType = "AllPrincipals",
+                ResourceId = await GetServicePrincipalId(client, "c5393580-f805-4401-95e8-94b7a6ef2fc2").ConfigureAwait(false),
+                Scope = "ActivityFeed.Read ActivityFeed.ReadDlp ServiceHealth.Read"
+            });
+
+            WriteDebug($"Creating the Microsoft Graph OAuth2 permission grant for the {app.AppId} application");
+
+            await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
+            {
+                ClientId = servicePrincipal.Id,
+                ConsentType = "AllPrincipals",
+                ResourceId = await GetServicePrincipalId(client, "00000003-0000-0000-c000-000000000000").ConfigureAwait(false),
+                Scope = "AuditLog.Read.All DeviceManagementApps.Read.All DeviceManagementConfiguration.Read.All DeviceManagementManagedDevices.Read.All DeviceManagementServiceConfig.Read.All Directory.Read.All IdentityRiskyUser.Read.All InformationProtectionPolicy.Read Policy.Read.All Reports.Read.All SecurityEvents.Read.All User.Read"
+            });
+
+            return app.AppId;
         }
 
         private List<RequiredResourceAccess> GetRequiredResourceAccess()
