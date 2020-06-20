@@ -74,7 +74,7 @@ PS C:\> Connect-SecMgmtAccount -ApplicationId 'xxxx-xxxx-xxxx-xxxx' -RefreshToke
 Connects to the Microsoft cloud using a refresh token that was generated using a [native application](https://docs.microsoft.com/azure/active-directory/develop/native-app).
 
 ### Example 4
-```
+```powershell
 PS C:\> $appId = 'xxxx-xxxx-xxxx-xxxx'
 PS C:\> $secret =  ConvertTo-SecureString 'app-secret-here' -AsPlainText -Force
 PS C:\> $refreshToken = '<refreshToken>'
@@ -140,21 +140,6 @@ Parameter Sets: ServicePrincipalCertificate
 Aliases:
 
 Required: True
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Confirm
-Prompts you for confirmation before running the cmdlet.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: (All)
-Aliases: cf
-
-Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
@@ -280,6 +265,21 @@ Use device code authentication instead of a browser control.
 Type: SwitchParameter
 Parameter Sets: User
 Aliases: Device, DeviceAuth, DeviceCode
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Confirm
+Prompts you for confirmation before running the cmdlet.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: cf
 
 Required: False
 Position: Named

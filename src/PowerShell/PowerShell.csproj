@@ -32,11 +32,13 @@
     <PackageReference Include="Microsoft.Win32.Registry" Version="4.7.0" />
     <PackageReference Include="PowerShellStandard.Library" Version="5.1.0" />
     <PackageReference Include="System.DirectoryServices" Version="4.7.0" />
+    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <PreLoadAssemblies Include="$(RepoSrc)lib\NetFxPreloadAssemblies\*.dll" />
+    <PreLoadAssemblies Include="$(RepoSrc)lib\System.Security.Cryptography.ProtectedData.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,6 +57,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Microsoft.Online.SecMgmt.PowerShell.format.ps1xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="SecMgmt.psd1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

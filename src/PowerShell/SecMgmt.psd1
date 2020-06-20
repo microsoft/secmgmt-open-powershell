@@ -11,7 +11,7 @@
     RootModule = 'SecMgmt.psm1'
 
     # Version number of this module.
-    ModuleVersion = '1.0.0'
+    ModuleVersion = '0.0.1'
 
     # Supported PSEditions
     CompatiblePSEditions = 'Core', 'Desktop'
@@ -76,7 +76,7 @@
     # TypesToProcess = @()
 
     # Format files (.ps1xml) to be loaded when importing this module
-    # FormatsToProcess = 'Microsoft.Online.SecMgmt.PowerShell.format.ps1xml'
+    FormatsToProcess = 'Microsoft.Online.SecMgmt.PowerShell.format.ps1xml'
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
     NestedModules = @()
@@ -88,6 +88,7 @@
     CmdletsToExport = 'Connect-SecMgmtAccount',
                       'Disconnect-SecMgmtAccount',
                       'Initialize-SecMgmtHybirdDeviceEnrollment',
+                      'Install-SecMgmtInsightsConnector',
                       'Resolve-SecMgmtError'
 
     # Variables to export from this module
@@ -124,7 +125,7 @@
             ReleaseNotes = ''
 
             # Prerelease string of this module
-            Prerelease = 'preview'
+            # Prerelease = 'preview'
 
             # Flag to indicate whether the module requires explicit user acceptance for install/update
             # RequireLicenseAcceptance = $false
