@@ -9,7 +9,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
     using System.Threading;
     using System.Threading.Tasks;
     using Identity.Client;
-    using Microsoft.Graph;
     using Rest;
 
     /// <summary>
@@ -29,7 +28,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
         {
             IClientApplicationBase app = GetClient(parameters.Account, parameters.Environment);
 
-            var data = await app.GetAccountsAsync().ConfigureAwait(false);
+            IEnumerable<IAccount> data = await app.GetAccountsAsync().ConfigureAwait(false);
             ServiceClientTracing.Information($"[SilentAuthenticator] data count is {data.Count()}");
 
             ServiceClientTracing.Information("[SilentAuthenticator] Calling GetAccountsAsync");

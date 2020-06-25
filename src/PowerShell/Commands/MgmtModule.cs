@@ -1,18 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Microsoft.Online.SecMgmt.PowerShell.Utilities
+namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
+    using System.Management.Automation;
     using System.Reflection;
+    using Factories;
+    using Models.Authentication;
 
     /// <summary>
-    /// Implementation of a custom assembly resolver.
+    /// Used to perform actions when the module is loaded and unloaded.
     /// </summary>
-    public static class CustomAssemblyResolver
+    public class MgmtModule : IModuleAssemblyInitializer, IModuleAssemblyCleanup
     {
         /// <summary>
         /// Contains the assemblies from the preload directory.
@@ -25,9 +28,9 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Utilities
         private static string PreloadAssemblyFolder { get; set; }
 
         /// <summary>
-        /// Initializes the custom assembly resolver.
+        /// Performs the required operations when the module is imported.
         /// </summary>
-        public static void Initialize()
+        public void OnImport()
         {
             PreloadAssemblyFolder = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "PreloadAssemblies");
 
@@ -35,8 +38,27 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Utilities
             {
                 PreloadAssemblies.Add(Path.GetFileNameWithoutExtension(file));
             }
-
+            
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
+
+            if (MgmtSession.Instance.AuthenticationFactory == null)
+            {
+                MgmtSession.Instance.AuthenticationFactory = new AuthenticationFactory();
+            }
+
+            if (MgmtSession.Instance.ClientFactory == null)
+            {
+                MgmtSession.Instance.ClientFactory = new ClientFactory();
+            }
+        }
+
+        /// <summary>
+        /// Performs the required operations when the module is unloaded.
+        /// </summary>
+        /// <param name="psModuleInfo">Information for the module.</param>
+        public void OnRemove(PSModuleInfo psModuleInfo)
+        {
+            AppDomain.CurrentDomain.AssemblyResolve -= CurrentDomain_AssemblyResolve;
         }
 
         /// <summary>
@@ -44,8 +66,8 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Utilities
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="args">The arguments for the resolve event.</param>
-        /// <returns></returns>
-        private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        /// <returns>The assembly that was resolved.</returns>
+        private Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
             try
             {
