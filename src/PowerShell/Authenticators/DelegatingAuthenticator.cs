@@ -6,14 +6,14 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
 {
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.IO;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading;
     using System.Threading.Tasks;
     using Identity.Client;
     using Identity.Client.Extensions.Msal;
+    using Rest;
     using Models.Authentication;
-    using System.IO;
-    using Microsoft.Rest;
 
     /// <summary>
     /// Provides a chain of responsibility pattern for authenticators.

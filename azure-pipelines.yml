@@ -69,6 +69,60 @@ steps:
     PoliCheck: true
   condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
 
+- task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+  displayName: 'ESRP code signing'
+  inputs:
+    ConnectedServiceName: 'esrp-secmgmt-open-powershell'
+    FolderPath: 'artifacts\$(buildConfiguration)'
+    Pattern: 'Microsoft.Online.SecMgmt.PowerShell.dll,*.ps1xml,*.psd1,*.psm1'
+    signConfigType: inlineSignParams
+    inlineOperation: |
+     [
+         {
+             "keyCode": "CP-230012",
+             "operationSetCode": "SigntoolSign",
+             "parameters": [
+             {
+                 "parameterName": "OpusName",
+                 "parameterValue": "Microsoft"
+             },
+             {
+                 "parameterName": "OpusInfo",
+                 "parameterValue": "http://www.microsoft.com"
+             },
+             {
+                 "parameterName": "FileDigest",
+                 "parameterValue": "/fd \"SHA256\""
+             },
+             {
+                 "parameterName": "PageHash",
+                 "parameterValue": "/NPH"
+             },
+             {
+                 "parameterName": "TimeStamp",
+                 "parameterValue": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+             }
+             ],
+             "toolName": "sign",
+             "toolVersion": "1.0"
+         },
+         {
+             "keyCode": "CP-230012",
+             "operationSetCode": "SigntoolVerify",
+             "parameters": [ ],
+            "toolName": "sign",
+             "toolVersion": "1.0"
+         }
+     ]
+  condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+
+- task: DeleteFiles@1
+  displayName: Delete the code sign summary file
+  inputs:
+    SourceFolder: '$(system.DefaultWorkingDirectory)'
+    Contents: '**\CodeSignSummary-*.md'
+  condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+
 - task: CopyFiles@2
   displayName: 'Copy artifacts directory to $(build.ArtifactStagingDirectory)'
   inputs:
