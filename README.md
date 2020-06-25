@@ -1,6 +1,6 @@
 # Security and Management Open PowerShell Module
 
-[![Build Status](https://dev.azure.com/isaiahwilliams/public/_apis/build/status/microsoft.secmgmt-open-powershell?branchName=master)](https://dev.azure.com/isaiahwilliams/public/_build/latest?definitionId=53&branchName=master)
+[![Build Status](https://dev.azure.com/isaiahwilliams/public/_apis/build/status/secmgmt-open-powershell?branchName=master)](https://dev.azure.com/isaiahwilliams/public/_build/latest?definitionId=53&branchName=master)
 
 ## Requirements
 
