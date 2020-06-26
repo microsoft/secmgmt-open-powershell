@@ -14,7 +14,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     /// </summary>
     [Cmdlet(VerbsData.Initialize, "SecMgmtHybirdDeviceEnrollment", SupportsShouldProcess = true)]
     [OutputType(typeof(string))]
-    public class InitializeSecMgmtHybirdDeviceEnrollment : PSCmdlet
+    public class InitializeSecMgmtHybirdDeviceEnrollment : WindowsMgmtCmdlet
     {
         /// <summary>
         /// Gets or sets the Azure Active Directory domain used for device authentication.
@@ -33,7 +33,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         /// <summary>
         /// Performs the execution of the command.
         /// </summary>
-        protected override void ProcessRecord()
+        public override void ExecuteCmdlet()
         {
             if (!ShouldProcess("Creates the group policy and  service connection point required to have domain joined devices automatically enroll into MDM."))
             {

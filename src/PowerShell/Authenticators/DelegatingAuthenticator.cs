@@ -12,8 +12,8 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
     using System.Threading.Tasks;
     using Identity.Client;
     using Identity.Client.Extensions.Msal;
-    using Rest;
     using Models.Authentication;
+    using Rest;
 
     /// <summary>
     /// Provides a chain of responsibility pattern for authenticators.

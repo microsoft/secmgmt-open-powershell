@@ -61,6 +61,9 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         /// </summary>
         private readonly ConcurrentQueue<Task> outputTasks = new ConcurrentQueue<Task>();
 
+        /// <summary>
+        /// The event that is triggered when the task is completed.k
+        /// </summary>
         public event EventHandler OnTaskCompleted;
 
         /// <summary>
