@@ -38,7 +38,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             {
                 PreloadAssemblies.Add(Path.GetFileNameWithoutExtension(file));
             }
-            
+
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
             if (MgmtSession.Instance.AuthenticationFactory == null)

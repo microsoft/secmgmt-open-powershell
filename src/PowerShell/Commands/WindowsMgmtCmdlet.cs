@@ -4,7 +4,7 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 {
     using System;
-    using Microsoft.Online.SecMgmt.PowerShell.Exceptions;
+    using Exceptions;
 
     /// <summary>
     /// Base for cmdlets that will only work on devices running Windows.
