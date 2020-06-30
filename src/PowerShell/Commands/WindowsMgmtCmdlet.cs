@@ -16,6 +16,8 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         /// </summary>
         protected override void BeginProcessing()
         {
+            base.BeginProcessing(); 
+
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             {
                 throw new MgmtPowerShellException("This cmdlet can only be invoked on a device running Windows");
