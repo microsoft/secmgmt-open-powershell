@@ -69,10 +69,10 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
         [DllImport("Advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegSetValueEx", SetLastError = true)]
         private static extern int RegSetValueEx(
             IntPtr hKey,
-            [MarshalAs(UnmanagedType.LPStr)] string lpValueName,
-            int lpReserved,
+            [In] string lpValueName,
+            IntPtr lpReserved,
             RegistryValueKind lpType,
-            IntPtr lpData,
+            byte[] lpData,
             int cbData);
 
         public static void RegistryCloseKey(ref IntPtr key)
@@ -108,10 +108,10 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
 
         public static void RegistrySetValue(
             IntPtr hKey,
-            [MarshalAs(UnmanagedType.LPStr)] string lpValueName,
-            int reserved,
+            [In] string lpValueName,
+            IntPtr reserved,
             RegistryValueKind dwType,
-            IntPtr lpData,
+            byte[] lpData,
             int cbData)
         {
             int error;

@@ -10,9 +10,9 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
     /// <summary>
     /// Provides methods to create and modify a GPO directly, without using the Group Policy Object Editor.
     /// </summary>
-    [ComImport, Guid("EA502723-A23D-11d1-A7D3-0000F87571E3"),
+    [ComImport, Guid("7E37D5E7-263D-45CF-842B-96A95C63E46C"),
     InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IGroupPolicyObject
+    public interface IGroupPolicyObject2
     {
         /// <summary>
         /// Creates a new GPO in the Active Directory with the specified display name.
