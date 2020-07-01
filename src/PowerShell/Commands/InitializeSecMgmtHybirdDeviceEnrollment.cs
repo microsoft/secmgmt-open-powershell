@@ -9,6 +9,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using Interop;
     using Win32;
     using Models.Authentication;
+    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Cmdlet that creates the group policy and service connection point required to have domain joined devices automatically enroll into MDM.
@@ -55,6 +56,8 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             {
                 DirectoryEntry deDRC;
                 DirectoryEntry deSCP;
+                int size = Marshal.SizeOf(typeof(int));
+
                 string azureADId = $"azureADId:{tenantId}";
                 string azureADName = $"azureADName:{Domain}";
                 string configCN = rootDSE.Properties["configurationNamingContext"][0].ToString();
@@ -97,11 +100,12 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 }
 
                 IGroupPolicyObject groupPolicyObject = new GroupPolicyObject() as IGroupPolicyObject;
-                IntPtr reserved = IntPtr.Zero;
+
                 IntPtr sectionKeyHandle;
                 string domainName = $"LDAP://{rootDSE.Properties["defaultNamingContext"].Value}";
 
                 WriteDebug($"Creating {GroupPolicyDisplayName} group policy");
+
                 groupPolicyObject.New(domainName, GroupPolicyDisplayName, 0x1);
                 sectionKeyHandle = groupPolicyObject.GetRegistryKey(0x2);
 
@@ -116,23 +120,19 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                     out IntPtr key,
                     out RegResult desposition);
 
-                SetRegistryDWordValue(key, "AutoEnrollMDM", reserved, 1);
-                SetRegistryDWordValue(key, "UseAADCredentialType", reserved, 1);
+                IntPtr pData = Marshal.AllocHGlobal(size);
+                Marshal.WriteInt32(pData, 1);
 
-                groupPolicyObject.Save(true, true, new Guid("35378EAC-683F-11D2-A89A-00C04FBBCFA2"), new Guid("8FC0B734-A0E1-11d1-A7D3-0000F87571E3"));
+                RegistryOperations.RegistrySetValue(key, "AutoEnrollMDM", 0, RegistryValueKind.DWord, pData, size);
+                RegistryOperations.RegistrySetValue(key, "UseAADCredentialType", 0, RegistryValueKind.DWord, pData, size);
+
+                groupPolicyObject.Save(true, true, new Guid("35378EAC-683F-11D2-A89A-00C04FBBCFA2"), new Guid("0F6B957D-509E-11D1-A7CC-0000F87571E3"));
 
                 RegistryOperations.RegistryCloseKey(ref key);
                 RegistryOperations.RegistryCloseKey(ref sectionKeyHandle);
 
                 WriteObject($"Domain has been prepared and the {GroupPolicyDisplayName} group policy has been created. You will need to link the group policy for the settings to apply.");
             }
-        }
-
-        private void SetRegistryDWordValue(IntPtr key, string valueName, IntPtr reserved, int value)
-        {
-            byte[] data = { (byte)value, (byte)(value >> 8), (byte)(value >> 16), (byte)(value >> 24) };
-
-            RegistryOperations.RegistrySetValue(key, valueName, reserved, RegistryValueKind.DWord, data, 4);
         }
     }
 }
