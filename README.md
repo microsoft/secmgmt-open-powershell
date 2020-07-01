@@ -1,6 +1,8 @@
 # Security and Management Open PowerShell Module
 
-[![Build Status](https://dev.azure.com/isaiahwilliams/public/_apis/build/status/microsoft.secmgmt-open-powershell?branchName=master)](https://dev.azure.com/isaiahwilliams/public/_build/latest?definitionId=53&branchName=master)
+[![Build Status](https://dev.azure.com/isaiahwilliams/public/_apis/build/status/secmgmt-open-powershell?branchName=master)](https://dev.azure.com/isaiahwilliams/public/_build/latest?definitionId=53&branchName=master)
+
+[![SecMgmt](https://img.shields.io/powershellgallery/v/SecMgmt.svg?style=flat-square&label=SecMgmt)](https://www.powershellgallery.com/packages/SecMgmt/) [![GitHub issues](https://img.shields.io/github/issues/microsoft/secmgmt-open-powershell.svg)](https://github.com/microsoft/secmgmt-open-powershell/issues/) [![GitHub pull-requests](https://img.shields.io/github/issues-pr/microsoft/secmgmt-open-powershell.svg)](https://gitHub.com/microsoft/secmgmt-open-powershell/pull/)
 
 ## Requirements
 
