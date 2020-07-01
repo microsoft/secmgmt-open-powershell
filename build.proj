@@ -33,7 +33,7 @@
       <TestOutputDirectory>$(RepoArtifacts)/TestResults</TestOutputDirectory>
     </PropertyGroup>
 
-    <Exec Command="dotnet build SecMgmt-Open-PowerShell.sln -c $(Configuration)" />
+    <Exec Command="dotnet build secmgmt-open-powershell.sln -c $(Configuration)" />
 
     <!-- Delete PowerShell runtime files -->
     <PropertyGroup>
