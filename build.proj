@@ -33,7 +33,7 @@
       <TestOutputDirectory>$(RepoArtifacts)/TestResults</TestOutputDirectory>
     </PropertyGroup>
 
-    <Exec Command="dotnet build SecMgmt-Open-PowerShell.sln -c $(Configuration)" />
+    <Exec Command="dotnet build secmgmt-open-powershell.sln -c $(Configuration)" />
 
     <!-- Delete PowerShell runtime files -->
     <PropertyGroup>
@@ -63,13 +63,7 @@
     <Exec Command="$(PowerShellCoreCommandPrefix) &quot;Set-Variable -Name ProgressPreference -Value 'SilentlyContinue';. $(RepoTools)/GenerateHelp.ps1 -ValidateMarkdownHelp -GenerateMamlHelp -BuildConfig $(Configuration)&quot;" />
   </Target>
 
-  <Target Name="Full" DependsOnTargets="Clean;Build;GenerateHelp;ValidateModule;Test" />
-
-  <Target Name="Test">
-    <Message Importance="high" Text="Running unit tests..." />
-    <MakeDir Directories="$(TestOutputDirectory)" ContinueOnError="false" />
-    <Exec Command="dotnet test SecMgmt-Open-PowerShell.sln --configuration $(Configuration) --framework netcoreapp3.0 --logger trx --results-directory &quot;$(TestOutputDirectory)&quot;" />
-  </Target>
+  <Target Name="Full" DependsOnTargets="Clean;Build;GenerateHelp;ValidateModule" />
 
   <Target Name="ValidateModule">
     <Message Importance="high" Text="Validating the module definition..." />
