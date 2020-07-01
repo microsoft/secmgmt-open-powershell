@@ -15,13 +15,13 @@ Installs the latest version of the Security and Management Insights Power BI con
 ## SYNTAX
 
 ### CreateApp (Default)
-```
+```powershell
 Install-SecMgmtInsightsConnector -ApplicationDisplayName <String> [-ConfigurePreconsent] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
 
 ### UseExisting
-```
+```powershell
 Install-SecMgmtInsightsConnector -ApplicationId <String> [-ConfigurePreconsent] [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
