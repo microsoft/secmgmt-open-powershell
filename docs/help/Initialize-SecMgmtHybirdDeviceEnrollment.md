@@ -15,8 +15,8 @@ Performs the tasks to intialize Hybrid Azure AD join in the current forest to be
 ## SYNTAX
 
 ```powershell
-Initialize-SecMgmtHybirdDeviceEnrollment -Domain <String> -GroupPolicyDisplayName <String> [-WhatIf] [-Confirm]
- [<CommonParameters>]
+Initialize-SecMgmtHybirdDeviceEnrollment -Domain <String> -GroupPolicyDisplayName <String> [-TenantId <String>]
+ [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -57,6 +57,21 @@ Parameter Sets: (All)
 Aliases:
 
 Required: True
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -TenantId
+Identifier for the Azure Active Directory tenant.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: Tenant
+
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False

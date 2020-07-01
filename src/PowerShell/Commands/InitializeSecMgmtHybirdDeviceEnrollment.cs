@@ -8,6 +8,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using System.Management.Automation;
     using Interop;
     using Win32;
+    using Models.Authentication;
 
     /// <summary>
     /// Cmdlet that creates the group policy and service connection point required to have domain joined devices automatically enroll into MDM.
@@ -31,6 +32,14 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         public string GroupPolicyDisplayName { get; set; }
 
         /// <summary>
+        /// Gets or sets the tenant identifier.
+        /// </summary>
+        [Alias("Tenant")]
+        [Parameter(HelpMessage = "Identifier for the Azure Active Directory tenant.", Mandatory = false)]
+        [ValidateNotNull]
+        public string TenantId { get; set; }
+
+        /// <summary>
         /// Performs the execution of the command.
         /// </summary>
         public override void ExecuteCmdlet()
@@ -40,11 +49,13 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 return;
             }
 
+            string tenantId = string.IsNullOrEmpty(TenantId) ? MgmtSession.Instance.Context.Account.Tenant : TenantId;
+
             using (DirectoryEntry rootDSE = new DirectoryEntry("LDAP://RootDSE"))
             {
                 DirectoryEntry deDRC;
                 DirectoryEntry deSCP;
-                string azureADId = "azureADId:851f90cd-614e-4523-acc1-cef7aaf00638";
+                string azureADId = $"azureADId:{tenantId}";
                 string azureADName = $"azureADName:{Domain}";
                 string configCN = rootDSE.Properties["configurationNamingContext"][0].ToString();
                 string servicesCN = $"CN=Services,{configCN}";
