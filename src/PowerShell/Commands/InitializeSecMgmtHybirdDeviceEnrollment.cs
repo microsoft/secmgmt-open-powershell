@@ -117,7 +117,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                     out RegResult desposition);
 
                 SetRegistryDWordValue(key, "AutoEnrollMDM", reserved, 1);
-                SetRegistryDWordValue(key, "UseAADCredentialType", reserved, 2);
+                SetRegistryDWordValue(key, "UseAADCredentialType", reserved, 1);
 
                 groupPolicyObject.Save(true, true, new Guid("35378EAC-683F-11D2-A89A-00C04FBBCFA2"), new Guid("8FC0B734-A0E1-11d1-A7D3-0000F87571E3"));
 
