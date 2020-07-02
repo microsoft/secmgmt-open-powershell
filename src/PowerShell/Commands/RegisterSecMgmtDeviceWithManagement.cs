@@ -64,7 +64,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         /// </summary>
         public override void ExecuteCmdlet()
         {
-            if (!ShouldProcess("Registers the devices, invoking this cmdlet, with the MDM service."))
+            if (!ShouldProcess("Registers the devices, invoking this cmdlet, with the management service."))
             {
                 return;
             }
