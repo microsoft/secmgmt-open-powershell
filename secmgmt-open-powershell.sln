@@ -18,6 +18,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PowerShell", "src\PowerShell\PowerShell.csproj", "{A6E8B430-FA70-465F-85C8-A616E0E1328C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{268E7307-C5DD-4080-B300-6A5AA8EA4A70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PowerShell.UnitTests", "test\PowerShell.UnitTests\PowerShell.UnitTests.csproj", "{8D154119-B132-44BC-B7E8-FC6AD1A3ABC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,12 +32,17 @@ Global
 		{A6E8B430-FA70-465F-85C8-A616E0E1328C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A6E8B430-FA70-465F-85C8-A616E0E1328C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A6E8B430-FA70-465F-85C8-A616E0E1328C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D154119-B132-44BC-B7E8-FC6AD1A3ABC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D154119-B132-44BC-B7E8-FC6AD1A3ABC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D154119-B132-44BC-B7E8-FC6AD1A3ABC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D154119-B132-44BC-B7E8-FC6AD1A3ABC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A6E8B430-FA70-465F-85C8-A616E0E1328C} = {5873728E-33A7-447B-A03B-87B2EF296DE0}
+		{8D154119-B132-44BC-B7E8-FC6AD1A3ABC4} = {268E7307-C5DD-4080-B300-6A5AA8EA4A70}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2991A44F-B70C-45D1-B845-61E74D39639B}

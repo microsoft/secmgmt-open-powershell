@@ -32,13 +32,6 @@ steps:
     result: 'PoliCheck.xml'
   condition: and(succeeded(), eq(variables['Agent.OS'], 'Windows_NT'))
 
-- task: DotNetCoreCLI@2
-  displayName: Build
-  inputs:
-    command: custom
-    custom: msbuild
-    arguments: 'build.proj /t:Build /p:Configuration=$(buildConfiguration)'
-
 - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0 
   displayName: 'Component Detection'
 
@@ -46,11 +39,11 @@ steps:
   displayName: 'Install platyPS'
 
 - task: DotNetCoreCLI@2
-  displayName: 'Generate Help'
+  displayName: Build
   inputs:
     command: custom
     custom: msbuild
-    arguments: 'build.proj /t:GenerateHelp /p:Configuration=$(buildConfiguration)'
+    arguments: 'build.proj /t:Full /p:Configuration=$(buildConfiguration)'
 
 - pwsh: 'Test-ModuleManifest .\artifacts\$(buildConfiguration)\SecMgmt.psd1'
   displayName: 'Validate Manifest'
