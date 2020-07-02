@@ -6,8 +6,8 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using System;
     using System.Management.Automation;
     using Exceptions;
-    using Properties;
     using Models.Authentication;
+    using Properties;
 
     /// <summary>
     /// Base for cmdlets that will only work on devices running Windows.
