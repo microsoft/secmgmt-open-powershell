@@ -5,6 +5,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
 {
     using System;
     using System.Runtime.InteropServices;
+    using System.Text;
 
     /// <summary>
     /// Provides functions to manage MDM registration.
@@ -38,6 +39,16 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
         /// <returns>If the function succeeds, the return value is ERROR_SUCCESS. If the function fails, the returned value describes the error.</returns>
         [DllImport(@"mdmregistration.dll")]
         public static extern int DiscoverManagementService([MarshalAs(UnmanagedType.LPWStr)] string pszUPN, out IntPtr ppMgmtInfo);
+
+        /// <summary>
+        /// Checks whether the device is registered with an MDM service. If the device is registered, it also returns the user principal name (UPN) of the registered user.
+        /// </summary>
+        /// <param name="pfIsDeviceRegisteredWithManagement">A flag indicating whether or not the device is registered.</param>
+        /// <param name="cchUPN">Contains the maximum length that can be returned through the pszUPN parameter.</param>
+        /// <param name="pszUPN">Optional address of a buffer that receives the NULL-terminated Unicode string containing the UPN of the user registered with the management service. If pszUPN is NULL then the BOOL pointed to by the pfIsDeviceRegisteredWithManagement parameter is updated to indicate whether the device is registered and the function returns ERROR_SUCCESS.</param>
+        /// <returns>If the function succeeds, the return value is ERROR_SUCCESS and the BOOL pointed to by the pfIsDeviceRegisteredWithManagement parameter contains TRUE or FALSE. If TRUE, the Unicode string pointed to by the pszUPN parameter contains the UPN of the registered user.</returns>
+        [DllImport(@"mdmregistration.dll")]
+        public static extern int IsDeviceRegisteredWithManagement(out bool pfIsDeviceRegisteredWithManagement, uint cchUPN, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszUPN);
 
         /// <summary>
         /// Registers a device with a MDM service, using the Mobile Device Enrollment Protocol.

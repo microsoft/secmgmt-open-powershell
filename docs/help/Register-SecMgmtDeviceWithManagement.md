@@ -1,13 +1,13 @@
 ---
-content_git_url: https://github.com/microsoft/secmgmt-open-powershell/blob/master/docs/help/Register-SecMgmtDeviceWithMdm.md
+content_git_url: https://github.com/microsoft/secmgmt-open-powershell/blob/master/docs/help/Register-SecMgmtDeviceWithManagement.md
 external help file: Microsoft.Online.SecMgmt.PowerShell.dll-Help.xml
 Module Name: SecMgmt
-online version: https://docs.microsoft.com/powershell/module/secmgmt/register-secmgmtdevicewithmdm
-original_content_git_url: https://github.com/microsoft/secmgmt-open-powershell/blob/master/docs/help/Register-SecMgmtDeviceWithMdm.md
+online version: https://docs.microsoft.com/powershell/module/secmgmt/register-SecMgmtDeviceWithManagement
+original_content_git_url: https://github.com/microsoft/secmgmt-open-powershell/blob/master/docs/help/Register-SecMgmtDeviceWithManagement.md
 schema: 2.0.0
 ---
 
-# Register-SecMgmtDeviceWithMdm
+# Register-SecMgmtDeviceWithManagement
 
 ## SYNOPSIS
 Registers the device, that is invoking this cmdlet, with the MDM service.
@@ -16,16 +16,16 @@ Registers the device, that is invoking this cmdlet, with the MDM service.
 
 ### RegisterWithAadCredentials (Default)
 ```powershell
-Register-SecMgmtDeviceWithMdm [-UseAzureAdCredentials] [-WhatIf] [-Confirm] [<CommonParameters>]
+Register-SecMgmtDeviceWithManagement [-UseAzureAdCredentials] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ### RegisterWithAadDeviceCredentials
 ```powershell
-Register-SecMgmtDeviceWithMdm [-UseAzureAdDeviceCredentials] [-WhatIf] [-Confirm] [<CommonParameters>]
+Register-SecMgmtDeviceWithManagement [-UseAzureAdDeviceCredentials] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 ### RegisterWithCredentials
 ```powershell
-Register-SecMgmtDeviceWithMdm -AccessToken <String> -UserPrincipalName <String> [-WhatIf] [-Confirm]
+Register-SecMgmtDeviceWithManagement -AccessToken <String> -UserPrincipalName <String> [-WhatIf] [-Confirm]
  [<CommonParameters>]
 ```
 
@@ -36,14 +36,14 @@ Registers the device, that is invoking this cmdlet, with the MDM service.
 
 ### Example 1
 ```powershell
-PS C:\> Register-SecMgmtDeviceWithMdm -UseAzureAdCredentials
+PS C:\> Register-SecMgmtDeviceWithManagement -UseAzureAdCredentials
 ```
 
 Registers the device, that is invoking this cmdlet, with the MDM service leveraging the Azure Active Directory credentials the user used to authenticate into Windows.
 
 ### Example 2
 ```powershell
-PS C:\> Register-SecMgmtDeviceWithMdm -UseAzureAdDeviceCredentials
+PS C:\> Register-SecMgmtDeviceWithManagement -UseAzureAdDeviceCredentials
 ```
 
 Registers the device, that is invoking this cmdlet, with the MDM service leveraging the Azure Active Directory device credentials.
@@ -52,7 +52,7 @@ Registers the device, that is invoking this cmdlet, with the MDM service leverag
 ```powershell
 PS C:\> $accessToken = 'JSON-web-token-here'
 PS C:\> $upn = 'user@contoso.onmicrosoft.com'
-PS C:\> Register-SecMgmtDeviceWithMdm -AccessToken $accessToken -UserPrincipalName $upn
+PS C:\> Register-SecMgmtDeviceWithManagement -AccessToken $accessToken -UserPrincipalName $upn
 ```
 
 Registers the device, that is invoking this cmdlet, with the MDM service leveraging the specified access information.

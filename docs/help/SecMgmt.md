@@ -23,7 +23,7 @@ Performs the tasks to intialize Hybrid Azure AD join in the current forest to be
 ### [Install-SecMgmtInsightsConnector](Install-SecMgmtInsightsConnector.md)
 Installs the latest version of the Security and Management Insights Power BI connector. 
 
-### [Register-SecMgmtDeviceWithMdm](Register-SecMgmtDeviceWithMdm.md)
+### [Register-SecMgmtDeviceWithManagement](Register-SecMgmtDeviceWithManagement.md)
 Registers the device, that is invoking this cmdlet, with the MDM service.
 
 ### [Resolve-SecMgmtError](Resolve-SecMgmtError.md)

@@ -6,14 +6,16 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using System;
     using System.Management.Automation;
     using System.Runtime.InteropServices;
+    using System.Text;
+    using Exceptions;
     using Interop;
 
     /// <summary>
-    /// Cmdlet that registers the device with the MDM service.
+    /// Cmdlet that registers the device with the management (MDM) service.
     /// </summary>
-    [Cmdlet(VerbsLifecycle.Register, "SecMgmtDeviceWithMdm", DefaultParameterSetName = RegisterWithAadCredentialsParameterSet, SupportsShouldProcess = true)]
+    [Cmdlet(VerbsLifecycle.Register, "SecMgmtDeviceWithManagement", DefaultParameterSetName = RegisterWithAadCredentialsParameterSet, SupportsShouldProcess = true)]
     [OutputType(typeof(string))]
-    public class RegisterSecMgmtDeviceWithMdm : WindowsMgmtCmdlet
+    public class RegisterSecMgmtDeviceWithManagement : WindowsMgmtCmdlet
     {
         /// <summary>
         /// Name of the register with Azure Active Directory credentials parameter set.
@@ -67,21 +69,51 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 return;
             }
 
-            if (ParameterSetName.Equals(RegisterWithAadCredentialsParameterSet, StringComparison.InvariantCultureIgnoreCase))
+            StringBuilder stringBuilder = new StringBuilder();
+            int error;
+            uint maxBufferSize = 256;
+
+            if (MdmRegistration.IsDeviceRegisteredWithManagement(out bool registered, maxBufferSize, stringBuilder) == 0)
             {
-                MdmRegistration.RegisterDeviceWithManagementUsingAADCredentials(IntPtr.Zero);
-            }
-            else if (ParameterSetName.Equals(RegisterWithAadDeviceCredentialsParameterSet, StringComparison.InvariantCultureIgnoreCase))
-            {
-                MdmRegistration.RegisterDeviceWithManagementUsingAADDeviceCredentials();
+                if (registered)
+                {
+                    WriteObject($"Device is already registered for management by {stringBuilder}");
+                    return;
+                }
             }
             else
             {
-                MdmRegistration.DiscoverManagementService(UserPrincipalName, out IntPtr pInfo);
-                MdmRegistration.ManagementServiceInfo info = (MdmRegistration.ManagementServiceInfo)Marshal.PtrToStructure(pInfo, typeof(MdmRegistration.ManagementServiceInfo));
-
-                MdmRegistration.RegisterDeviceWithManagement(UserPrincipalName, info.mdmServiceUri, AccessToken);
+                throw new MgmtPowerShellException("Failed to determine fi the device is registered with management.");
             }
+
+            if (ParameterSetName.Equals(RegisterWithAadCredentialsParameterSet, StringComparison.InvariantCultureIgnoreCase))
+            {
+                error = MdmRegistration.RegisterDeviceWithManagementUsingAADCredentials(IntPtr.Zero);
+            }
+            else if (ParameterSetName.Equals(RegisterWithAadDeviceCredentialsParameterSet, StringComparison.InvariantCultureIgnoreCase))
+            {
+                error = MdmRegistration.RegisterDeviceWithManagementUsingAADDeviceCredentials();
+            }
+            else
+            {
+                if (MdmRegistration.DiscoverManagementService(UserPrincipalName, out IntPtr pInfo) == 0)
+                {
+                    MdmRegistration.ManagementServiceInfo info = (MdmRegistration.ManagementServiceInfo)Marshal.PtrToStructure(pInfo, typeof(MdmRegistration.ManagementServiceInfo));
+                    error = MdmRegistration.RegisterDeviceWithManagement(UserPrincipalName, info.mdmServiceUri, AccessToken);
+                }
+                else
+                {
+                    throw new MgmtPowerShellException($"Failed to discover the management service for {UserPrincipalName}");
+                }
+
+            }
+
+            if (error != 0)
+            {
+                throw new MgmtPowerShellException($"Device registration with the management service failed with error {error}");
+            }
+
+            WriteObject("Device has been registered with the management service.");
         }
     }
 }

@@ -89,7 +89,7 @@
                       'Disconnect-SecMgmtAccount',
                       'Initialize-SecMgmtHybirdDeviceEnrollment',
                       'Install-SecMgmtInsightsConnector',
-                      'Register-SecMgmtDeviceWithMdm',
+                      'Register-SecMgmtDeviceWithManagement',
                       'Resolve-SecMgmtError'
 
     # Variables to export from this module
