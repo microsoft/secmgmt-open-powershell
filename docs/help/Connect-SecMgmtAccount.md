@@ -310,11 +310,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### Microsoft.Online.SecMgmt.PowerShell.Models.Authentication.MgmtContext
-
 ## NOTES
 
 ## RELATED LINKS
