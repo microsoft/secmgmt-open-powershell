@@ -27,7 +27,7 @@ Install-SecMgmtInsightsConnector -ApplicationId <String> [-ConfigurePreconsent] 
 ```
 
 ## DESCRIPTION
-Installs the latest version of the Security and Management Insights Power BI connector 
+Installs the latest version of the Security and Management Insights Power BI connector.
 
 ## EXAMPLES
 
@@ -129,11 +129,9 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### None
-
 ## OUTPUTS
 
 ### System.String
-
 ## NOTES
 
 ## RELATED LINKS
