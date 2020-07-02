@@ -86,7 +86,15 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 WriteDebug($"Writing the appliction identifer to {Path.Combine(workingPath, "client_id")}");
                 System.IO.File.WriteAllText(Path.Combine(workingPath, "client_id"), appId);
 
-                ZipFile.CreateFromDirectory(workingPath, Path.Combine(connectorPath, "SecMgmtInsights.mez"));
+                if (System.IO.File.Exists(Path.Combine(connectorPath, "SecMgmtInsights.mez")))
+                {
+                    WriteWarning($"Unable to install the connector because the {Path.Combine(connectorPath, "SecMgmtInsights.mez")} already exists.");
+                    WriteWarning($"To install the latest version delete the SecMgmtInsights.mez file and then run Install-SecMgmtInsightsConnector -ApplicationId {appId}");
+                }
+                else
+                {
+                    ZipFile.CreateFromDirectory(workingPath, Path.Combine(connectorPath, "SecMgmtInsights.mez"));
+                }
 
                 WriteDebug($"Deleting {zipPath}");
                 System.IO.File.Delete(zipPath);
