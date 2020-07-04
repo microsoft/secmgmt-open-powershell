@@ -11,6 +11,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using System.Reflection;
     using Factories;
     using Models.Authentication;
+    using Utilities;
 
     /// <summary>
     /// Used to perform actions when the module is loaded and unloaded.
@@ -50,6 +51,8 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             {
                 MgmtSession.Instance.ClientFactory = new ClientFactory();
             }
+
+            MgmtSession.Instance.RegisterComponent(ComponentKey.TokenCache, () => new PersistentTokenCache());
         }
 
         /// <summary>

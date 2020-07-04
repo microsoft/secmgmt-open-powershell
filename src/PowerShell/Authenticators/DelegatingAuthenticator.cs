@@ -1,11 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
 {
-    using System.Collections.Generic;
-    using System.Diagnostics;
     using System.IO;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading;
@@ -14,6 +11,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
     using Identity.Client.Extensions.Msal;
     using Models.Authentication;
     using Rest;
+    using Utilities;
 
     /// <summary>
     /// Provides a chain of responsibility pattern for authenticators.
@@ -154,7 +152,11 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
                 MgmtSession.Instance.DebugMessages.Enqueue($"[MSAL] {level} {message}");
             }).Build();
 
-            GetMsalCacheStorage(clientId).RegisterCache(client.UserTokenCache);
+            if (MgmtSession.Instance.TryGetComponent(ComponentKey.TokenCache, out IMgmtTokenCache tokenCache))
+            {
+                ServiceClientTracing.Information($"[MSAL] Registering the token cache for client {clientId}");
+                tokenCache.RegisterCache(client);
+            }
 
             return client;
         }
@@ -192,8 +194,11 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
                 MgmtSession.Instance.DebugMessages.Enqueue($"[MSAL] {level} {message}");
             }).Build();
 
-            ServiceClientTracing.Information($"[MSAL] Registering the token cache for client {clientId}");
-            GetMsalCacheStorage(clientId).RegisterCache(client.UserTokenCache);
+            if (MgmtSession.Instance.TryGetComponent(ComponentKey.TokenCache, out IMgmtTokenCache tokenCache))
+            {
+                ServiceClientTracing.Information($"[MSAL] Registering the token cache for client {clientId}");
+                tokenCache.RegisterCache(client);
+            }
 
             return client;
         }
@@ -246,26 +251,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Gets an aptly configured instance of the <see cref="MsalCacheStorage" /> class.
-        /// </summary>
-        /// <param name="clientId">The client identifier for the calling application.</param>
-        /// <returns>An aptly configured instance of the <see cref="MsalCacheStorage" /> class.</returns>
-        private static MsalCacheHelper GetMsalCacheStorage(string clientId)
-        {
-            StorageCreationPropertiesBuilder builder = new StorageCreationPropertiesBuilder(Path.GetFileName(CacheFilePath), Path.GetDirectoryName(CacheFilePath), clientId);
-
-            builder = builder.WithMacKeyChain(serviceName: "Microsoft.Developer.IdentityService", accountName: "MSALCache");
-            builder = builder.WithLinuxKeyring(
-                schemaName: "msal.cache",
-                collection: "default",
-                secretLabel: "MSALCache",
-                attribute1: new KeyValuePair<string, string>("MsalClientID", "Microsoft.Developer.IdentityService"),
-                attribute2: new KeyValuePair<string, string>("MsalClientVersion", "1.0.0.0"));
-
-            return MsalCacheHelper.CreateAsync(builder.Build(), new TraceSource("Security and Management Open PowerShell")).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
         /// <summary>
