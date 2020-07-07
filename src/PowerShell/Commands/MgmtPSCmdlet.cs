@@ -8,8 +8,15 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     using System.Globalization;
     using System.Linq;
     using System.Management.Automation;
+    using System.Net.NetworkInformation;
     using System.Reflection;
+    using System.Security.Cryptography;
+    using System.Text;
     using System.Threading;
+    using ApplicationInsights;
+    using ApplicationInsights.DataContracts;
+    using ApplicationInsights.Extensibility;
+    using Models;
     using Models.Authentication;
     using Network;
     using Properties;
@@ -21,9 +28,27 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
     public abstract class MgmtPSCmdlet : PSCmdlet, IDisposable
     {
         /// <summary>
+        /// Name of the telemetry event.
+        /// </summary>
+        private const string EVENT_NAME = "cmdletInvocation";
+
+        /// <summary>
         /// The link that provide addtional information regarding the breaking change.
         /// </summary>
         private const string BREAKING_CHANGE_ATTRIBUTE_INFORMATION_LINK = "https://aka.ms/secmgmtps-changewarnings";
+
+        /// <summary>
+        /// Client that provides the ability to interact with the Application Insights service.
+        /// </summary>
+        private static readonly TelemetryClient telemetryClient = new TelemetryClient(TelemetryConfiguration.CreateDefault())
+        {
+            InstrumentationKey = "0db552ae-7428-4286-9f5a-d159d876dd3a"
+        };
+
+        /// <summary>
+        /// Lock used to synchronize mutation of the tracing interceptors.
+        /// </summary>
+        private readonly object resourceLock = new object();
 
         /// <summary>
         /// Provides a signal to <see cref="System.Threading.CancellationToken" /> that it should be canceled.
@@ -41,14 +66,57 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         private bool disposed = false;
 
         /// <summary>
+        /// A SHA 256 hash of the MAC address.
+        /// </summary>
+        private string hashMacAddress;
+
+        /// <summary>
         /// Provides the ability to log HTTP operations when the debug parameter is present.
         /// </summary>
         private RecordingTracingInterceptor httpTracingInterceptor;
 
         /// <summary>
+        /// The quality of service event that will be captured by telemetry if enabled.
+        /// </summary>
+        private MgmtQosEvent qosEvent;
+
+        /// <summary>
         /// Gets the cancellation token used to propagate a notification that operations should be canceled.
         /// </summary>
         protected CancellationToken CancellationToken => cancellationSource.Token;
+
+        /// <summary>
+        /// Gets the SHA 256 has the MAC address.
+        /// </summary>
+        private string HashMacAddress
+        {
+            get
+            {
+                lock (resourceLock)
+                {
+                    try
+                    {
+                        hashMacAddress = null;
+
+                        if (string.IsNullOrEmpty(hashMacAddress))
+                        {
+                            string value = NetworkInterface.GetAllNetworkInterfaces()?
+                                 .FirstOrDefault(nic => nic != null &&
+                                     nic.OperationalStatus == OperationalStatus.Up &&
+                                     !string.IsNullOrWhiteSpace(nic.GetPhysicalAddress()?.ToString()))?.GetPhysicalAddress()?.ToString();
+
+                            hashMacAddress = string.IsNullOrWhiteSpace(value) ? null : GenerateSha256HashString(value)?.Replace("-", string.Empty)?.ToLowerInvariant();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // Ignore errors with obtaining the MAC address
+                    }
+                }
+
+                return hashMacAddress;
+            }
+        }
 
         /// <summary>
         /// Gets the correlation identifier used for correlating events.
@@ -88,6 +156,8 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         /// </summary>
         protected override void BeginProcessing()
         {
+            string commandAlias = GetType().Name;
+
             if (cancellationSource == null)
             {
                 cancellationSource = new CancellationTokenSource();
@@ -103,6 +173,25 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             ServiceClientTracing.IsEnabled = true;
             ServiceClientTracing.AddTracingInterceptor(httpTracingInterceptor);
 
+            if (MyInvocation != null && MyInvocation.MyCommand != null)
+            {
+                commandAlias = MyInvocation.MyCommand.Name;
+            }
+
+            qosEvent = new MgmtQosEvent
+            {
+                CommandName = commandAlias,
+                IsSuccess = true,
+                ModuleVersion = GetType().Assembly.GetName().Version.ToString(),
+                ParameterSetName = ParameterSetName
+            };
+
+            if (MyInvocation != null && MyInvocation.BoundParameters != null && MyInvocation.BoundParameters.Keys != null)
+            {
+                qosEvent.Parameters = string.Join(" ", MyInvocation.BoundParameters.Keys.Select(
+                    s => string.Format(CultureInfo.InvariantCulture, "-{0} ***", s)));
+            }
+
             ProcessBreakingChangeAttributesAtRuntime(GetType(), MyInvocation, WriteWarning);
         }
 
@@ -111,6 +200,8 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         /// </summary>
         protected override void EndProcessing()
         {
+            LogQosEvent();
+
             if (cancellationSource != null)
             {
                 if (!cancellationSource.IsCancellationRequested)
@@ -229,6 +320,36 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         }
 
         /// <summary>
+        /// Generate a SHA 256 hash string from the originInput.
+        /// </summary>
+        /// <param name="input">The input value to be hashed.</param>
+        /// <returns>The SHA 256 hash, or empty if the input is only whtespace.</returns>
+        private static string GenerateSha256HashString(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return string.Empty;
+            }
+
+            string result = null;
+
+            try
+            {
+                using (SHA256CryptoServiceProvider sha256 = new SHA256CryptoServiceProvider())
+                {
+                    byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+                    result = BitConverter.ToString(bytes);
+                }
+            }
+            catch
+            {
+                // do not throw if CryptoProvider is not provided
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Gets all of the breaking change attributes in the specified type.
         /// </summary>
         /// <param name="type">The type for the command being invoked.</param>
@@ -299,6 +420,125 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Logs the execption event.
+        /// </summary>
+        private void LogExceptionEvent()
+        {
+            if (qosEvent == null)
+            {
+                return;
+            }
+
+            ExceptionTelemetry exceptionTelemetry = new ExceptionTelemetry(qosEvent.Exception)
+            {
+                Message = "The message has been removed due to PII"
+            };
+
+            if (qosEvent.Exception is RestException)
+            {
+                object ex = qosEvent.Exception;
+                HttpResponseMessageWrapper response = ex.GetType().GetProperty("Response").GetValue(ex, null) as HttpResponseMessageWrapper;
+
+                PopulatePropertiesFromResponse(exceptionTelemetry.Properties, response);
+            }
+
+            exceptionTelemetry.Metrics.Add("Duration", qosEvent.Duration.TotalMilliseconds);
+            PopulatePropertiesFromQos(exceptionTelemetry.Properties);
+
+            try
+            {
+#if DEBUG
+                telemetryClient.TrackException(exceptionTelemetry);
+#endif
+            }
+            catch
+            {
+                // Ignore any error with capturing the telemetry
+            }
+        }
+
+        /// <summary>
+        /// Logs the quality of srevice event.
+        /// </summary>
+        private void LogQosEvent()
+        {
+            if (qosEvent == null)
+            {
+                return;
+            }
+
+            qosEvent.FinishQosEvent();
+
+            PageViewTelemetry pageViewTelemetry = new PageViewTelemetry
+            {
+                Name = EVENT_NAME,
+                Duration = qosEvent.Duration,
+                Timestamp = qosEvent.StartTime
+            };
+
+            pageViewTelemetry.Context.Device.OperatingSystem = Environment.OSVersion.ToString();
+            PopulatePropertiesFromQos(pageViewTelemetry.Properties);
+
+            try
+            {
+#if DEBUG
+                telemetryClient.TrackPageView(pageViewTelemetry);
+#endif
+            }
+            catch
+            {
+                // Ignore any error with capturing the telemetry
+            }
+
+            if (qosEvent.Exception != null)
+            {
+                LogExceptionEvent();
+            }
+        }
+
+        /// <summary>
+        /// Populates the telemetry event properties based on the quality of service event.
+        /// </summary>
+        /// <param name="eventProperties">The telemetry event properties to be populated.</param>
+        private void PopulatePropertiesFromQos(IDictionary<string, string> eventProperties)
+        {
+            if (qosEvent == null)
+            {
+                return;
+            }
+
+            eventProperties.Add("Command", qosEvent.CommandName);
+            eventProperties.Add("CommandParameterSetName", qosEvent.ParameterSetName);
+            eventProperties.Add("CommandParameters", qosEvent.Parameters);
+            eventProperties.Add("HashMacAddress", HashMacAddress);
+            eventProperties.Add("HostVersion", qosEvent.HostVersion);
+            eventProperties.Add("IsSuccess", qosEvent.IsSuccess.ToString());
+            eventProperties.Add("ModuleVersion", qosEvent.ModuleVersion);
+            eventProperties.Add("PowerShellVersion", Host.Version.ToString());
+
+            if (!string.IsNullOrEmpty(MgmtSession.Instance.Context?.Account?.Tenant))
+            {
+                eventProperties.Add("TenantId", MgmtSession.Instance.Context.Account.Tenant);
+            }
+        }
+
+        /// <summary>
+        /// Populates the telemetry event properties based on the HTTP response message.
+        /// </summary>
+        /// <param name="eventProperties">The telemetry event properties to be populated.</param>
+        /// <param name="response">The HTTP response used to populate the event properties.</param>
+        private void PopulatePropertiesFromResponse(IDictionary<string, string> eventProperties, HttpResponseMessageWrapper response)
+        {
+            if (response == null)
+            {
+                return;
+            }
+
+            eventProperties.Add("ReasonPhrase", response.ReasonPhrase);
+            eventProperties.Add("StatusCode", response.StatusCode.ToString());
         }
 
         /// <summary>
