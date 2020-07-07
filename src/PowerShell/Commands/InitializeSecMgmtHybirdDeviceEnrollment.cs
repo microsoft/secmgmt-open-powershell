@@ -4,11 +4,17 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 {
     using System;
+    using System.Collections.Generic;
     using System.DirectoryServices;
+    using System.Linq;
     using System.Management.Automation;
     using System.Runtime.InteropServices;
+    using System.Threading.Tasks;
+    using Graph;
     using Interop;
     using Models.Authentication;
+    using Network;
+    using Properties;
     using Win32;
 
     /// <summary>
@@ -21,14 +27,14 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         /// <summary>
         /// Gets or sets the Azure Active Directory domain used for device authentication.
         /// </summary>
-        [Parameter(HelpMessage = "Azure Active Directory domain used for device authentication", Mandatory = true)]
+        [Parameter(HelpMessage = "Azure Active Directory domain used for device authentication.", Mandatory = false)]
         [ValidateNotNull]
         public string Domain { get; set; }
 
         /// <summary>
         /// Gets or sets the display name for the Group Policy that will be created.
         /// </summary>
-        [Parameter(HelpMessage = "Display name for the group policy that will be created", Mandatory = true)]
+        [Parameter(HelpMessage = "Display name for the group policy that will be created.", Mandatory = true)]
         [ValidateNotNull]
         public string GroupPolicyDisplayName { get; set; }
 
@@ -41,16 +47,32 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         public string TenantId { get; set; }
 
         /// <summary>
+        /// Operations that happen before the cmdlet is invoked.
+        /// </summary>
+        protected override void BeginProcessing()
+        {
+            base.BeginProcessing();
+
+            if (MgmtSession.Instance.Context == null)
+            {
+                throw new PSInvalidOperationException(Resources.RunConnectSecMgmtAccount);
+            }
+        }
+
+        /// <summary>
         /// Performs the execution of the command.
         /// </summary>
         public override void ExecuteCmdlet()
         {
-            if (!ShouldProcess("Creates the group policy and  service connection point required to have domain joined devices automatically enroll into MDM."))
+            if (!ShouldProcess("Creates the group policy and service connection point required to have domain joined devices automatically enroll into MDM."))
             {
                 return;
             }
 
             string tenantId = string.IsNullOrEmpty(TenantId) ? MgmtSession.Instance.Context.Account.Tenant : TenantId;
+            string aadDomain = string.IsNullOrEmpty(Domain) ? GetDomainValue(tenantId).ConfigureAwait(false).GetAwaiter().GetResult() : Domain;
+
+            WriteDebug($"Using {aadDomain} for the domain value and {tenantId} for the tenant identifier value");
 
             using (DirectoryEntry rootDSE = new DirectoryEntry("LDAP://RootDSE"))
             {
@@ -59,7 +81,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 int size = Marshal.SizeOf(typeof(int));
 
                 string azureADId = $"azureADId:{tenantId}";
-                string azureADName = $"azureADName:{Domain}";
+                string azureADName = $"azureADName:{aadDomain}";
                 string configCN = rootDSE.Properties["configurationNamingContext"][0].ToString();
                 string servicesCN = $"CN=Services,{configCN}";
                 string drcCN = $"CN=Device Registration Configuration,{servicesCN}";
@@ -131,6 +153,23 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 
                 WriteObject($"Domain has been prepared and the {GroupPolicyDisplayName} group policy has been created. You will need to link the group policy for the settings to apply.");
             }
+        }
+
+        private async Task<string> GetDomainValue(string tenantId)
+        {
+            GraphServiceClient client = MgmtSession.Instance.ClientFactory.CreateGraphServiceClient() as GraphServiceClient;
+            client.AuthenticationProvider = new GraphAuthenticationProvider(tenantId);
+
+            IGraphServiceDomainsCollectionPage data = await client.Domains.Request().GetAsync(CancellationToken).ConfigureAwait(false);
+            List<Domain> domains = new List<Domain>(data.CurrentPage);
+
+            while (data.NextPageRequest != null)
+            {
+                data = await data.NextPageRequest.GetAsync(CancellationToken).ConfigureAwait(false);
+                domains.AddRange(data.CurrentPage);
+            }
+
+            return domains.Single(x => x.IsInitial.Value).Id;
         }
 
         private void SetRegistryDWordValue(IntPtr key, string valueName, int value)
