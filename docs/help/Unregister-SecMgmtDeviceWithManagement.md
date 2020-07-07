@@ -1,34 +1,33 @@
 ---
-content_git_url: https://github.com/microsoft/secmgmt-open-powershell/blob/master/docs/help/Disconnect-SecMgmtAccount.md
+content_git_url: https://github.com/microsoft/secmgmt-open-powershell/blob/master/docs/help/Unregister-SecMgmtDeviceWithManagement.md
 external help file: Microsoft.Online.SecMgmt.PowerShell.dll-Help.xml
 Module Name: SecMgmt
-online version: https://docs.microsoft.com/powershell/module/secmgmt/disconnect-secmgmtaccount
-original_content_git_url: https://github.com/microsoft/secmgmt-open-powershell/blob/master/docs/help/Disconnect-SecMgmtAccount.md
+online version: https://docs.microsoft.com/powershell/module/secmgmt/unregister-secmgmtdevicewithmanagement
+original_content_git_url: https://github.com/microsoft/secmgmt-open-powershell/blob/master/docs/help/Unregister-SecMgmtDeviceWithManagement.md
 schema: 2.0.0
 ---
-
-# Disconnect-SecMgmtAccount
+# Unregister-SecMgmtDeviceWithManagement
 
 ## SYNOPSIS
-Disconnects the current session from the Microsoft cloud.
+Unregisters the device, that is invoking this cmdlet, with the MDM service.
 
 ## SYNTAX
 
 ```powershell
-Disconnect-SecMgmtAccount [-WhatIf] [-Confirm] [<CommonParameters>]
+Unregister-SecMgmtDeviceWithManagement [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-Disconnects the current session from the Microsoft cloud.
+Unregisters the device, that is invoking this cmdlet, with the MDM service.
 
 ## EXAMPLES
 
 ### Example 1
 ```powershell
-PS C:\> Disconnect-SecMgmtAccount
+PS C:\> Unregister-SecMgmtDeviceWithManagement
 ```
 
-Disconnects the current session from the Microsoft cloud.
+Unregisters the device, that is invoking this cmdlet, with the MDM service.
 
 ## PARAMETERS
 
@@ -72,7 +71,8 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ## OUTPUTS
 
-### System.Object
+### System.String
+
 ## NOTES
 
 ## RELATED LINKS

@@ -19,14 +19,15 @@ Registers the device, that is invoking this cmdlet, with the MDM service.
 Register-SecMgmtDeviceWithManagement [-UseAzureAdCredentials] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
-### RegisterWithAadDeviceCredentials
-```powershell
-Register-SecMgmtDeviceWithManagement [-UseAzureAdDeviceCredentials] [-WhatIf] [-Confirm] [<CommonParameters>]
-```
 ### RegisterWithCredentials
 ```powershell
 Register-SecMgmtDeviceWithManagement -AccessToken <String> -UserPrincipalName <String> [-WhatIf] [-Confirm]
  [<CommonParameters>]
+```
+
+### RegisterWithAadDeviceCredentials
+```powershell
+Register-SecMgmtDeviceWithManagement [-UseAzureAdDeviceCredentials] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION

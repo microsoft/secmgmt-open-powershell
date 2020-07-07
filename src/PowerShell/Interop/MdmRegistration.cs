@@ -37,7 +37,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
         /// <param name="pszUPN">Address of a NULL-terminated Unicode string containing the user principal name (UPN) of the user requesting registration.</param>
         /// <param name="ppMgmtInfo">Address of a MANAGEMENT_SERVICE_INFO structure that contains pointers to the URIs of the management and authentication services.</param>
         /// <returns>If the function succeeds, the return value is ERROR_SUCCESS. If the function fails, the returned value describes the error.</returns>
-        [DllImport(@"mdmregistration.dll")]
+        [DllImport("mdmregistration.dll")]
         public static extern int DiscoverManagementService([MarshalAs(UnmanagedType.LPWStr)] string pszUPN, out IntPtr ppMgmtInfo);
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
         /// <param name="cchUPN">Contains the maximum length that can be returned through the pszUPN parameter.</param>
         /// <param name="pszUPN">Optional address of a buffer that receives the NULL-terminated Unicode string containing the UPN of the user registered with the management service. If pszUPN is NULL then the BOOL pointed to by the pfIsDeviceRegisteredWithManagement parameter is updated to indicate whether the device is registered and the function returns ERROR_SUCCESS.</param>
         /// <returns>If the function succeeds, the return value is ERROR_SUCCESS and the BOOL pointed to by the pfIsDeviceRegisteredWithManagement parameter contains TRUE or FALSE. If TRUE, the Unicode string pointed to by the pszUPN parameter contains the UPN of the registered user.</returns>
-        [DllImport(@"mdmregistration.dll")]
+        [DllImport("mdmregistration.dll")]
         public static extern int IsDeviceRegisteredWithManagement(out bool pfIsDeviceRegisteredWithManagement, uint cchUPN, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszUPN);
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
         /// <param name="ppszMDMServiceUri">Address of a NULL-terminated Unicode string containing the URI of the MDM service.</param>
         /// <param name="ppzsAccessToken">Address of a NULL-terminated Unicode string containing a token acquired from a Secure Token Service which the management service will use to validate the user.</param>
         /// <returns>If the function succeeds, the return value is ERROR_SUCCESS. If the function fails, the returned value describes the error. </returns>
-        [DllImport(@"mdmregistration.dll")]
+        [DllImport("mdmregistration.dll")]
         public static extern int RegisterDeviceWithManagement(
             [MarshalAs(UnmanagedType.LPWStr)] string pszUPN,
             [MarshalAs(UnmanagedType.LPWStr)] string ppszMDMServiceUri,
@@ -85,7 +85,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
         /// <param name="enrollmentID">The identifier for the enrollment.</param>
         /// <returns>If the function succeeds, the return value is ERROR_SUCCESS. If the function fails, the returned value describes the error.</returns>
         /// <remarks>The caller of this function must be running as an elevated process.</remarks>
-        [DllImport(@"mdmregistration.dll")]
+        [DllImport("mdmregistration.dll")]
         public static extern int UnregisterDeviceWithManagement([MarshalAs(UnmanagedType.LPWStr)] string enrollmentID);
     }
 }

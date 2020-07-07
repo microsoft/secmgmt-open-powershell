@@ -83,7 +83,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             }
             else
             {
-                throw new MgmtPowerShellException("Failed to determine fi the device is registered with management.");
+                throw new MgmtPowerShellException("Failed to determine if the device is registered with management.");
             }
 
             if (ParameterSetName.Equals(RegisterWithAadCredentialsParameterSet, StringComparison.InvariantCultureIgnoreCase))
@@ -105,7 +105,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 {
                     throw new MgmtPowerShellException($"Failed to discover the management service for {UserPrincipalName}");
                 }
-
             }
 
             if (error != 0)

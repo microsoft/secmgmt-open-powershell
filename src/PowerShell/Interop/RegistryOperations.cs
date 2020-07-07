@@ -54,7 +54,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
         [DllImport("advapi32.dll", SetLastError = true)]
         private static extern int RegCloseKey(IntPtr hKey);
 
-        [DllImport("Advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyEx", SetLastError = true)]
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegCreateKeyEx", SetLastError = true)]
         private static extern int RegCreateKeyEx(
             IntPtr hKey,
             string lpSubKey,
@@ -66,7 +66,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Interop
             out IntPtr phkResult,
             out RegResult lpdwDisposition);
 
-        [DllImport("Advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegSetValueEx", SetLastError = true)]
+        [DllImport("advapi32.dll", CharSet = CharSet.Unicode, EntryPoint = "RegSetValueEx", SetLastError = true)]
         private static extern int RegSetValueEx(
             IntPtr hKey,
             [In] string lpValueName,

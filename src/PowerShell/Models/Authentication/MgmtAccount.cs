@@ -28,7 +28,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Models.Authentication
         public string ObjectId { get; set; }
 
         /// <summary>
-        /// Gets or sets the name identifier or name.
+        /// Gets or sets tenant identifier.
         /// </summary>
         public string Tenant { get; set; }
 

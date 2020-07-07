@@ -4,15 +4,12 @@
 namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 {
     using System;
-    using System.Management.Automation;
     using Exceptions;
-    using Models.Authentication;
-    using Properties;
 
     /// <summary>
     /// Base for cmdlets that will only work on devices running Windows.
     /// </summary>
-    public abstract class WindowsMgmtCmdlet : MgmtPSCmdlet
+    public abstract class WindowsMgmtCmdlet : MgmtAsyncCmdlet
     {
         /// <summary>
         /// Operations that happen before the cmdlet is invoked.
@@ -20,11 +17,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         protected override void BeginProcessing()
         {
             base.BeginProcessing();
-
-            if (MgmtSession.Instance.Context == null)
-            {
-                throw new PSInvalidOperationException(Resources.RunConnectSecMgmtAccount);
-            }
 
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             {

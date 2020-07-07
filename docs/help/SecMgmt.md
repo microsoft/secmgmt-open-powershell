@@ -21,10 +21,16 @@ Disconnects the current session from the Microsoft cloud.
 Performs the tasks to intialize Hybrid Azure AD join in the current forest to be managed by MDM.
 
 ### [Install-SecMgmtInsightsConnector](Install-SecMgmtInsightsConnector.md)
-Installs the latest version of the Security and Management Insights Power BI connector. 
+Installs the latest version of the Security and Management Insights Power BI connector 
+
+### [New-SecMgmtAccessToken](New-SecMgmtAccessToken.md)
+Acquires an access token from Azure Active Directory.
 
 ### [Register-SecMgmtDeviceWithManagement](Register-SecMgmtDeviceWithManagement.md)
 Registers the device, that is invoking this cmdlet, with the MDM service.
 
 ### [Resolve-SecMgmtError](Resolve-SecMgmtError.md)
 Display detailed information about PowerShell errors, with extended details for cmdlet errors.
+
+### [Unregister-SecMgmtDeviceWithManagement](Unregister-SecMgmtDeviceWithManagement.md)
+Unregisters the device, that is invoking this cmdlet, with the MDM service.

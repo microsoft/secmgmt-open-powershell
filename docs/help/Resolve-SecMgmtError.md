@@ -88,10 +88,13 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Management.Automation.ErrorRecord[]
+
 ## OUTPUTS
 
 ### Microsoft.Online.SecMgmt.PowerShell.Models.Errors.MgmtErrorRecord
+
 ### Microsoft.Online.SecMgmt.PowerShell.Models.Errors.MgmtExceptionRecord
+
 ## NOTES
 
 ## RELATED LINKS
