@@ -15,8 +15,8 @@ Performs the tasks to intialize Hybrid Azure AD join in the current forest to be
 ## SYNTAX
 
 ```powershell
-Initialize-SecMgmtHybirdDeviceEnrollment -Domain <String> -GroupPolicyDisplayName <String> [-TenantId <String>]
- [-WhatIf] [-Confirm] [<CommonParameters>]
+Initialize-SecMgmtHybirdDeviceEnrollment [-Domain <String>] -GroupPolicyDisplayName <String>
+ [-TenantId <String>] [-WhatIf] [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -26,10 +26,18 @@ Performs the tasks to intialize Hybrid Azure AD join in the current forest to be
 
 ### Example 1
 ```powershell
-PS C:\> Initialize-SecMgmtHybirdDeviceEnrollment -Domain 'contoso.onmicrosoft.com' -GroupPolicyDisplayName 'Device Management'
+PS C:\> Initialize-SecMgmtHybirdDeviceEnrollment -GroupPolicyDisplayName 'Device Management'
 ```
 
-Performs the tasks to intialize Hybrid Azure AD join in the current forest to be managed by MDM. If you are using federation to authenticate with Azure AD, enter a federated domain name. Otherwise, use your *.onmicrosoft.com domain.
+Performs the tasks to intialize Hybrid Azure AD join in the current forest to be managed by MDM. Use this option if you are not utilizing federation for authentication.
+
+
+### Example 2
+```powershell
+PS C:\> Initialize-SecMgmtHybirdDeviceEnrollment -Domain 'federate-domain-name.com' -GroupPolicyDisplayName 'Device Management'
+```
+
+Performs the tasks to intialize Hybrid Azure AD join in the current forest to be managed by MDM. Use this option if you are utilizing federation for authentication. Note you will need to replace the domain value with your federate domain value (e.g. contoso.com).
 
 ## PARAMETERS
 
@@ -41,7 +49,7 @@ Type: String
 Parameter Sets: (All)
 Aliases:
 
-Required: True
+Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
