@@ -107,7 +107,14 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         private async Task ConfigurePreconsentAsync(IGraphServiceClient client, string appId)
         {
             ServicePrincipal servicePrincipal = await GetServicePrincipalAsync(client, appId).ConfigureAwait(false); ;
-            IGraphServiceGroupsCollectionPage groups = await client.Groups.Request().Filter("DisplayName eq AdminAgents").GetAsync().ConfigureAwait(false);
+            IGraphServiceGroupsCollectionPage groups = await client.Groups.Request().Filter("DisplayName+eq+'AdminAgents'").GetAsync().ConfigureAwait(false);
+
+            if (groups.Count <= 0)
+            {
+                WriteWarning("Unable to locate the AdminAgents group in Azure AD, so pre-consent configuration was not able to be completed.");
+                return;
+            }
+            
             await client.Groups[groups[0].Id].Members.References.Request().AddAsync(servicePrincipal).ConfigureAwait(false);
         }
 
