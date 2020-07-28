@@ -47,19 +47,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         public string TenantId { get; set; }
 
         /// <summary>
-        /// Operations that happen before the cmdlet is invoked.
-        /// </summary>
-        protected override void BeginProcessing()
-        {
-            base.BeginProcessing();
-
-            if (MgmtSession.Instance.Context == null)
-            {
-                throw new PSInvalidOperationException(Resources.RunConnectSecMgmtAccount);
-            }
-        }
-
-        /// <summary>
         /// Performs the execution of the command.
         /// </summary>
         public override void ExecuteCmdlet()
@@ -67,6 +54,14 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             if (!ShouldProcess("Creates the group policy and service connection point required to have domain joined devices automatically enroll into MDM."))
             {
                 return;
+            }
+
+            if (string.IsNullOrEmpty(Domain) || string.IsNullOrEmpty(TenantId))
+            {
+                if (MgmtSession.Instance.Context == null)
+                {
+                    throw new PSInvalidOperationException(Resources.RunConnectSecMgmtAccount);
+                }
             }
 
             string tenantId = string.IsNullOrEmpty(TenantId) ? MgmtSession.Instance.Context.Account.Tenant : TenantId;
