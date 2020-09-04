@@ -54,7 +54,8 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Authenticators
                 GetAccount(token),
                 null,
                 parameters.Scopes,
-                Guid.Empty);
+                Guid.Empty,
+                null);
         }
 
         /// <summary>

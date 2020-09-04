@@ -16,14 +16,14 @@ Installs the latest version of the Security and Management Insights Power BI con
 
 ### CreateApp (Default)
 ```powershell
-Install-SecMgmtInsightsConnector -ApplicationDisplayName <String> [-ConfigurePreconsent] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+Install-SecMgmtInsightsConnector -ApplicationDisplayName <String> [-ConfigurePreconsent] [-Overwrite] [-WhatIf]
+ [-Confirm] [<CommonParameters>]
 ```
 
 ### UseExisting
 ```powershell
-Install-SecMgmtInsightsConnector -ApplicationId <String> [-ConfigurePreconsent] [-WhatIf] [-Confirm]
- [<CommonParameters>]
+Install-SecMgmtInsightsConnector -ApplicationId <String> [-ConfigurePreconsent] [-Overwrite] [-WhatIf]
+ [-Confirm] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -79,6 +79,21 @@ Accept wildcard characters: False
 
 ### -ConfigurePreconsent
 Flag indicating whether or not the Azure Active Directory application should be configured for pre-consent.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Overwrite
+Flag indicating whether or not an already installed version of the connector should be overwritten.
 
 ```yaml
 Type: SwitchParameter

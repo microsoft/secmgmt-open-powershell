@@ -16,7 +16,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Models.Authentication
         /// Intializes a new instance of the <see cref="AuthResult" /> class.
         /// </summary>
         public AuthResult(string accessToken, bool isExtendedLifeTimeToken, string uniqueId, DateTimeOffset expiresOn, DateTimeOffset extendedExpiresOn, string tenantId, IAccount account, string idToken, IEnumerable<string> scopes, Guid correlationId)
-            : base(accessToken, isExtendedLifeTimeToken, uniqueId, expiresOn, extendedExpiresOn, tenantId, account, idToken, scopes, correlationId)
+            : base(accessToken, isExtendedLifeTimeToken, uniqueId, expiresOn, extendedExpiresOn, tenantId, account, idToken, scopes, correlationId, null)
         {
         }
 

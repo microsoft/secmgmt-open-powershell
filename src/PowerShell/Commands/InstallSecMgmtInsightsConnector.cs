@@ -48,6 +48,12 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
         public SwitchParameter ConfigurePreconsent { get; set; }
 
         /// <summary>
+        /// Gets or sets a flag indicating whether or not an already installed version of the connector should be overwritten.
+        /// </summary>
+        [Parameter(HelpMessage = "Flag indicating whether or not an already installed version of the connector should be overwritten.")]
+        public SwitchParameter Overwrite { get; set; }
+
+        /// <summary>
         /// Executes the operations associated with the cmdlet.
         /// </summary>
         public override void ExecuteCmdlet()
@@ -55,16 +61,37 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
             Scheduler.RunTask(async () =>
             {
                 GraphServiceClient client = MgmtSession.Instance.ClientFactory.CreateGraphServiceClient() as GraphServiceClient;
-                client.AuthenticationProvider = new GraphAuthenticationProvider();
-
-                string appId = string.IsNullOrEmpty(ApplicationDisplayName) ?
-                    ApplicationId : await CreateApplicationAsync(client).ConfigureAwait(false);
                 string docsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 string connectorPath = Path.Combine(docsPath, "Microsoft Power BI Desktop", "Custom Connectors");
                 string workingPath = Path.Combine(connectorPath, Path.GetRandomFileName());
                 string zipPath = Path.Combine(connectorPath, "secmgmt-insights-connector.zip");
 
-                if (ConfigurePreconsent.IsPresent && ConfigurePreconsent.IsPresent)
+                client.AuthenticationProvider = new GraphAuthenticationProvider();
+                    
+                if (System.IO.File.Exists(Path.Combine(connectorPath, "SecMgmtInsights.mez")))
+                {
+                    if (!Overwrite.IsPresent || Overwrite.ToBool() == false)
+                    {
+                        WriteWarning($"Unable to install the connector because the {Path.Combine(connectorPath, "SecMgmtInsights.mez")} already exists.");
+
+                        ZipArchive archive = ZipFile.Open(Path.Combine(connectorPath, "SecMgmtInsights.mez"), ZipArchiveMode.Read);
+
+                        using (StreamReader reader = new StreamReader(archive.GetEntry("client_id").Open()))
+                        {
+                            WriteWarning($"To install the latest version run Install-SecMgmtInsightsConnector -ApplicationId {reader.ReadToEnd()} -Overwrite");
+                        }
+
+                        return;
+                    }
+                    else 
+                    {
+                        System.IO.File.Delete(Path.Combine(connectorPath, "SecMgmtInsights.mez"));
+                    }
+                }
+
+                string appId = string.IsNullOrEmpty(ApplicationDisplayName) ? ApplicationId : await CreateApplicationAsync(client).ConfigureAwait(false);
+
+                if (ConfigurePreconsent.IsPresent && ConfigurePreconsent.ToBool() != false)
                 {
                     WriteDebug($"Configuring the application {appId} for pre-consent");
                     await ConfigurePreconsentAsync(client, appId);
@@ -101,6 +128,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 
                 WriteDebug($"Deleting {workingPath}");
                 System.IO.Directory.Delete(workingPath, true);
+
             }, true);
         }
 
@@ -133,36 +161,56 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 SignInAudience = "AzureADMultipleOrgs"
             }, CancellationToken).ConfigureAwait(false);
 
-            WriteDebug($"Creating a service principal for the {app.AppId} application");
+            await CreateOauth2PermissionGrants(client, app.AppId).ConfigureAwait(false);
 
-            ServicePrincipal servicePrincipal = await client.ServicePrincipals.Request().AddAsync(new ServicePrincipal
+            return app.AppId;
+        }
+
+        private async Task CreateOauth2PermissionGrants(IGraphServiceClient client, string appId)
+        {
+            ServicePrincipal appPrincipal = await GetServicePrincipalAsync(client, appId).ConfigureAwait(false);
+            ServicePrincipal resourcePrincipal = await GetServicePrincipalAsync(client, "c5393580-f805-4401-95e8-94b7a6ef2fc2").ConfigureAwait(false);
+
+            appId.AssertNotEmpty(nameof(appId));
+
+            if (appPrincipal == null)
             {
-                AppId = app.AppId
+                WriteDebug($"Creating a service principal for the {appId} application");
+                
+                appPrincipal = await client.ServicePrincipals.Request().AddAsync(new ServicePrincipal
+                {
+                    AppId = appId
+                }).ConfigureAwait(false);
+            }
+
+            WriteDebug($"Updating the required resources for the {appId} application");
+
+            await client.Applications[appId].Request().UpdateAsync(new Application
+            {
+                RequiredResourceAccess = GetRequiredResourceAccess()
             }).ConfigureAwait(false);
 
-            ServicePrincipal resourcePrincipal = await GetServicePrincipalAsync(client, "c5393580-f805-4401-95e8-94b7a6ef2fc2").ConfigureAwait(false);
+            WriteDebug($"Creating the Office 365 Management OAuth2 permission grant for the {appId} application");
 
             await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
             {
-                ClientId = servicePrincipal.Id,
+                ClientId = appPrincipal.Id,
                 ConsentType = "AllPrincipals",
                 ResourceId = resourcePrincipal.Id,
                 Scope = "ActivityFeed.Read ActivityFeed.ReadDlp ServiceHealth.Read"
             });
 
-            WriteDebug($"Creating the Microsoft Graph OAuth2 permission grant for the {app.AppId} application");
+            WriteDebug($"Creating the Microsoft Graph OAuth2 permission grant for the {appId} application");
 
             resourcePrincipal = await GetServicePrincipalAsync(client, "00000003-0000-0000-c000-000000000000").ConfigureAwait(false);
 
             await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
             {
-                ClientId = servicePrincipal.Id,
+                ClientId = appPrincipal.Id,
                 ConsentType = "AllPrincipals",
                 ResourceId = resourcePrincipal.Id,
-                Scope = "AuditLog.Read.All DeviceManagementApps.Read.All DeviceManagementConfiguration.Read.All DeviceManagementManagedDevices.Read.All DeviceManagementServiceConfig.Read.All Directory.Read.All IdentityRiskyUser.Read.All InformationProtectionPolicy.Read Policy.Read.All Reports.Read.All SecurityEvents.Read.All User.Read"
+                Scope = "AuditLog.Read.All DeviceManagementApps.Read.All DeviceManagementConfiguration.Read.All DeviceManagementManagedDevices.Read.All DeviceManagementServiceConfig.Read.All Directory.Read.All IdentityRiskEvent.Read.All IdentityRiskyUser.Read.All InformationProtectionPolicy.Read Policy.Read.All Reports.Read.All SecurityEvents.Read.All User.Read"
             });
-
-            return app.AppId;
         }
 
         private List<RequiredResourceAccess> GetRequiredResourceAccess()
@@ -184,6 +232,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                     ResourceAppId = "00000003-0000-0000-c000-000000000000",
                     ResourceAccess = new[]
                     {
+                        new ResourceAccess { Id = new Guid("8f6a01e7-0391-4ee5-aa22-a3af122cef27"), Type = "Scope" },
                         new ResourceAccess { Id = new Guid("e4c9e354-4dc5-45b8-9e7c-e1393b0b1a20"), Type = "Scope" },
                         new ResourceAccess { Id = new Guid("4edf5f54-4666-44af-9de9-0144fb4b6e8c"), Type = "Scope" },
                         new ResourceAccess { Id = new Guid("f1493658-876a-4c87-8fa7-edb559b3476a"), Type = "Scope" },
