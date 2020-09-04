@@ -31,7 +31,6 @@ PS C:\> Initialize-SecMgmtHybirdDeviceEnrollment -GroupPolicyDisplayName 'Device
 
 Performs the tasks to intialize Hybrid Azure AD join in the current forest to be managed by MDM. Use this option if you are not utilizing federation for authentication.
 
-
 ### Example 2
 ```powershell
 PS C:\> Initialize-SecMgmtHybirdDeviceEnrollment -Domain 'federate-domain-name.com' -GroupPolicyDisplayName 'Device Management'

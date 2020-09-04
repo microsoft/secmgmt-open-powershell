@@ -89,7 +89,6 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                     }
                 }
 
-
                 string appId = string.IsNullOrEmpty(ApplicationDisplayName) ? ApplicationId : await CreateApplicationAsync(client).ConfigureAwait(false);
 
                 if (ConfigurePreconsent.IsPresent && ConfigurePreconsent.ToBool() != false)
@@ -162,28 +161,40 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 SignInAudience = "AzureADMultipleOrgs"
             }, CancellationToken).ConfigureAwait(false);
 
-            WriteDebug($"Creating a service principal for the {app.AppId} application");
-
-            ServicePrincipal servicePrincipal = await client.ServicePrincipals.Request().AddAsync(new ServicePrincipal
-            {
-                AppId = app.AppId
-            }).ConfigureAwait(false);
-
-            await CreateOauth2PermissionGrants(client, app.AppId, servicePrincipal.Id).ConfigureAwait(false);
+            await CreateOauth2PermissionGrants(client, app.AppId).ConfigureAwait(false);
 
             return app.AppId;
         }
 
-        private async Task CreateOauth2PermissionGrants(IGraphServiceClient client, string appId, string servicePrincipalId)
+        private async Task CreateOauth2PermissionGrants(IGraphServiceClient client, string appId)
         {
+            ServicePrincipal appPrincipal = await GetServicePrincipalAsync(client, appId).ConfigureAwait(false);
             ServicePrincipal resourcePrincipal = await GetServicePrincipalAsync(client, "c5393580-f805-4401-95e8-94b7a6ef2fc2").ConfigureAwait(false);
 
             appId.AssertNotEmpty(nameof(appId));
-            servicePrincipalId.AssertNotEmpty(nameof(servicePrincipalId));
+
+            if (appPrincipal == null)
+            {
+                WriteDebug($"Creating a service principal for the {appId} application");
+                
+                appPrincipal = await client.ServicePrincipals.Request().AddAsync(new ServicePrincipal
+                {
+                    AppId = appId
+                }).ConfigureAwait(false);
+            }
+
+            WriteDebug($"Updating the required resources for the {appId} application");
+
+            await client.Applications[appId].Request().UpdateAsync(new Application
+            {
+                RequiredResourceAccess = GetRequiredResourceAccess()
+            }).ConfigureAwait(false);
+
+            WriteDebug($"Creating the Office 365 Management OAuth2 permission grant for the {appId} application");
 
             await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
             {
-                ClientId = servicePrincipalId,
+                ClientId = appPrincipal.Id,
                 ConsentType = "AllPrincipals",
                 ResourceId = resourcePrincipal.Id,
                 Scope = "ActivityFeed.Read ActivityFeed.ReadDlp ServiceHealth.Read"
@@ -195,7 +206,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
 
             await client.Oauth2PermissionGrants.Request().AddAsync(new OAuth2PermissionGrant
             {
-                ClientId = servicePrincipalId,
+                ClientId = appPrincipal.Id,
                 ConsentType = "AllPrincipals",
                 ResourceId = resourcePrincipal.Id,
                 Scope = "AuditLog.Read.All DeviceManagementApps.Read.All DeviceManagementConfiguration.Read.All DeviceManagementManagedDevices.Read.All DeviceManagementServiceConfig.Read.All Directory.Read.All IdentityRiskEvent.Read.All IdentityRiskyUser.Read.All InformationProtectionPolicy.Read Policy.Read.All Reports.Read.All SecurityEvents.Read.All User.Read"
