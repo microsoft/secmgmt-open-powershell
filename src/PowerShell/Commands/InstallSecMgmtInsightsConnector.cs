@@ -159,7 +159,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 ClientId = servicePrincipal.Id,
                 ConsentType = "AllPrincipals",
                 ResourceId = resourcePrincipal.Id,
-                Scope = "AuditLog.Read.All DeviceManagementApps.Read.All DeviceManagementConfiguration.Read.All DeviceManagementManagedDevices.Read.All DeviceManagementServiceConfig.Read.All Directory.Read.All IdentityRiskyUser.Read.All InformationProtectionPolicy.Read Policy.Read.All Reports.Read.All SecurityEvents.Read.All User.Read"
+                Scope = "AuditLog.Read.All DeviceManagementApps.Read.All DeviceManagementConfiguration.Read.All DeviceManagementManagedDevices.Read.All DeviceManagementServiceConfig.Read.All Directory.Read.All IdentityRiskEvent.Read.All IdentityRiskyUser.Read.All InformationProtectionPolicy.Read Policy.Read.All Reports.Read.All SecurityEvents.Read.All User.Read"
             });
 
             return app.AppId;
@@ -184,6 +184,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                     ResourceAppId = "00000003-0000-0000-c000-000000000000",
                     ResourceAccess = new[]
                     {
+                        new ResourceAccess { Id = new Guid("8f6a01e7-0391-4ee5-aa22-a3af122cef27"), Type = "Scope" },
                         new ResourceAccess { Id = new Guid("e4c9e354-4dc5-45b8-9e7c-e1393b0b1a20"), Type = "Scope" },
                         new ResourceAccess { Id = new Guid("4edf5f54-4666-44af-9de9-0144fb4b6e8c"), Type = "Scope" },
                         new ResourceAccess { Id = new Guid("f1493658-876a-4c87-8fa7-edb559b3476a"), Type = "Scope" },
