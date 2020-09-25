@@ -102,7 +102,7 @@ namespace Microsoft.Online.SecMgmt.PowerShell.Commands
                 if (ConfigurePreconsent.IsPresent && ConfigurePreconsent.ToBool() != false)
                 {
                     WriteDebug($"Configuring the application {app.Id} for pre-consent");
-                    await ConfigurePreconsentAsync(client, app.Id);
+                    await ConfigurePreconsentAsync(client, app.AppId);
                 }
 
                 WriteDebug($"Esuring that {connectorPath} exists");
