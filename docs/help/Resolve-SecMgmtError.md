@@ -5,6 +5,8 @@ Module Name: SecMgmt
 online version: https://docs.microsoft.com/powershell/module/secmgmt/resolve-secmgmterror
 original_content_git_url: https://github.com/microsoft/secmgmt-open-powershell/blob/master/docs/help/Resolve-SecMgmtError.md
 schema: 2.0.0
+ms.topic: reference
+ms.prod: powershell
 ---
 
 # Resolve-SecMgmtError
